@@ -201,6 +201,18 @@ frontend:
         agent: "testing"
         comment: "✅ PASSED: Text input works correctly, send button enables when text is entered, Enter key submission functional, Bengali text input supported"
 
+  - task: "Voice Input Feature"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/ChatPage.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Need to test voice input button presence, updated welcome message, placeholder text, button states, and mobile view functionality"
+
 metadata:
   created_by: "testing_agent"
   version: "1.0"
