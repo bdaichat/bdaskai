@@ -220,14 +220,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Welcome Screen Display"
-    - "Sidebar Functionality"
-    - "Chat Functionality"
-    - "Mobile Responsiveness"
-    - "Input Field Functionality"
-    - "Dark Mode Toggle"
+    - "Voice Input Feature"
   stuck_tasks: []
-  test_all: true
+  test_all: false
   test_priority: "high_first"
 
 agent_communication:
