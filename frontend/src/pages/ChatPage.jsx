@@ -129,10 +129,10 @@ const Sidebar = ({
       {/* Sidebar */}
       <motion.aside
         initial={false}
-        animate={{ x: isOpen ? 0 : '-100%' }}
+        animate={{ x: isOpen ? 0 : (typeof window !== 'undefined' && window.innerWidth >= 1024) ? 0 : '-100%' }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className={`fixed lg:relative inset-y-0 left-0 z-50 w-72 glass-card rounded-none lg:rounded-2xl 
-                    flex flex-col lg:translate-x-0 ${isOpen ? '' : '-translate-x-full lg:translate-x-0'}`}
+        className={`fixed lg:static inset-y-0 left-0 z-50 w-72 glass-card rounded-none lg:rounded-2xl lg:m-4 lg:h-[calc(100vh-2rem)]
+                    flex flex-col transition-transform lg:transform-none ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
       >
         {/* Header */}
         <div className="p-4 border-b border-border/50">
@@ -270,6 +270,16 @@ const WelcomeScreen = ({ onSuggestionClick }) => {
     </motion.div>
   );
 };
+
+// Animated background component
+const AnimatedBackground = () => (
+  <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+    {/* Gradient orbs */}
+    <div className="absolute top-0 -left-40 w-80 h-80 bg-primary/20 rounded-full filter blur-[100px] animate-pulse-soft" />
+    <div className="absolute top-1/3 -right-20 w-60 h-60 bg-accent/20 rounded-full filter blur-[80px] animate-pulse-soft" style={{ animationDelay: '1s' }} />
+    <div className="absolute bottom-0 left-1/3 w-72 h-72 bg-primary-glow/15 rounded-full filter blur-[90px] animate-pulse-soft" style={{ animationDelay: '2s' }} />
+  </div>
+);
 
 // Main ChatPage component
 export default function ChatPage() {
@@ -437,7 +447,10 @@ export default function ChatPage() {
   };
   
   return (
-    <div className="h-screen flex overflow-hidden">
+    <div className="h-screen flex overflow-hidden relative">
+      {/* Animated Background */}
+      <AnimatedBackground />
+      
       {/* Sidebar */}
       <Sidebar
         sessions={sessions}
