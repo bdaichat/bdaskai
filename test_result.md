@@ -215,3 +215,5 @@ test_plan:
 agent_communication:
   - agent: "testing"
     message: "Starting comprehensive testing of BdAsk AI chatbot application. Will test all core features including Bengali interface, chat functionality, responsiveness, and user interactions."
+  - agent: "testing"
+    message: "TESTING COMPLETED: 4/6 features working correctly. Welcome screen, sidebar, chat functionality, and input field all working properly. Found 2 critical issues: 1) Dark mode toggle has DOM attachment error preventing toggle back to light mode, 2) Mobile responsiveness broken - sidebar not hiding on mobile and hamburger menu not clickable due to viewport issues. Both issues need CSS/JavaScript fixes."
