@@ -62,6 +62,216 @@ const SUGGESTIONS = [
   }
 ];
 
+// Voice Recognition Hook
+const useVoiceRecognition = () => {
+  const [isListening, setIsListening] = useState(false);
+  const [transcript, setTranscript] = useState("");
+  const [isSupported, setIsSupported] = useState(false);
+  const [error, setError] = useState(null);
+  const recognitionRef = useRef(null);
+
+  useEffect(() => {
+    // Check if browser supports speech recognition
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    
+    if (SpeechRecognition) {
+      setIsSupported(true);
+      const recognition = new SpeechRecognition();
+      
+      // Configure for Bengali
+      recognition.lang = 'bn-BD'; // Bengali (Bangladesh)
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.maxAlternatives = 1;
+
+      recognition.onresult = (event) => {
+        let finalTranscript = '';
+        let interimTranscript = '';
+        
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const result = event.results[i];
+          if (result.isFinal) {
+            finalTranscript += result[0].transcript;
+          } else {
+            interimTranscript += result[0].transcript;
+          }
+        }
+        
+        setTranscript(finalTranscript || interimTranscript);
+      };
+
+      recognition.onstart = () => {
+        setIsListening(true);
+        setError(null);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.onerror = (event) => {
+        setError(event.error);
+        setIsListening(false);
+        
+        if (event.error === 'not-allowed') {
+          toast.error("মাইক্রোফোন অনুমতি দেওয়া হয়নি। দয়া করে ব্রাউজার সেটিংস থেকে অনুমতি দিন।");
+        } else if (event.error === 'no-speech') {
+          toast.error("কোনো কথা শোনা যায়নি। আবার চেষ্টা করুন।");
+        } else if (event.error === 'network') {
+          toast.error("নেটওয়ার্ক সমস্যা। ইন্টারনেট সংযোগ পরীক্ষা করুন।");
+        }
+      };
+
+      recognitionRef.current = recognition;
+    } else {
+      setIsSupported(false);
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+    };
+  }, []);
+
+  const startListening = useCallback(() => {
+    if (recognitionRef.current && !isListening) {
+      setTranscript("");
+      try {
+        recognitionRef.current.start();
+      } catch (e) {
+        // Already started
+        console.log("Recognition already started");
+      }
+    }
+  }, [isListening]);
+
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current && isListening) {
+      recognitionRef.current.stop();
+    }
+  }, [isListening]);
+
+  const toggleListening = useCallback(() => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  }, [isListening, startListening, stopListening]);
+
+  return {
+    isListening,
+    transcript,
+    isSupported,
+    error,
+    startListening,
+    stopListening,
+    toggleListening,
+    resetTranscript: () => setTranscript("")
+  };
+};
+
+// Voice Input Button Component
+const VoiceInputButton = ({ onTranscript, disabled }) => {
+  const { 
+    isListening, 
+    transcript, 
+    isSupported, 
+    toggleListening,
+    resetTranscript 
+  } = useVoiceRecognition();
+
+  // Send transcript to parent when recording stops
+  useEffect(() => {
+    if (!isListening && transcript) {
+      onTranscript(transcript);
+      resetTranscript();
+    }
+  }, [isListening, transcript, onTranscript, resetTranscript]);
+
+  if (!isSupported) {
+    return (
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-lg"
+        disabled
+        className="flex-shrink-0 rounded-xl opacity-50"
+        title="আপনার ব্রাউজার ভয়েস ইনপুট সমর্থন করে না"
+      >
+        <MicOff className="w-5 h-5 text-muted-foreground" />
+      </Button>
+    );
+  }
+
+  return (
+    <Button
+      type="button"
+      variant={isListening ? "destructive" : "glass"}
+      size="icon-lg"
+      onClick={toggleListening}
+      disabled={disabled}
+      className={`flex-shrink-0 rounded-xl transition-all duration-300 ${
+        isListening ? 'animate-pulse bg-destructive shadow-glow' : ''
+      }`}
+      title={isListening ? "থামান" : "কথা বলুন"}
+    >
+      {isListening ? (
+        <motion.div
+          initial={{ scale: 0.8 }}
+          animate={{ scale: [1, 1.2, 1] }}
+          transition={{ repeat: Infinity, duration: 1 }}
+        >
+          <Mic className="w-5 h-5" />
+        </motion.div>
+      ) : (
+        <Mic className="w-5 h-5" />
+      )}
+    </Button>
+  );
+};
+
+// Voice Recording Indicator
+const VoiceRecordingIndicator = ({ isRecording }) => {
+  if (!isRecording) return null;
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 10 }}
+      className="absolute -top-16 left-1/2 transform -translate-x-1/2 glass-card px-4 py-2 flex items-center gap-3"
+    >
+      <motion.div
+        animate={{ scale: [1, 1.2, 1] }}
+        transition={{ repeat: Infinity, duration: 0.8 }}
+        className="w-3 h-3 rounded-full bg-destructive"
+      />
+      <span className="text-sm bangla-body text-foreground">
+        শুনছি... বাংলায় বলুন
+      </span>
+      <div className="flex gap-1">
+        {[0, 1, 2, 3].map((i) => (
+          <motion.div
+            key={i}
+            className="w-1 bg-primary rounded-full"
+            animate={{ 
+              height: [8, 16, 8],
+            }}
+            transition={{ 
+              repeat: Infinity, 
+              duration: 0.5, 
+              delay: i * 0.1,
+              ease: "easeInOut"
+            }}
+          />
+        ))}
+      </div>
+    </motion.div>
+  );
+};
+
 // Typing indicator component
 const TypingIndicator = () => (
   <div className="flex items-center gap-1 px-4 py-2">
