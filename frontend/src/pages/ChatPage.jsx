@@ -502,9 +502,28 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
   
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  
+  // Voice recognition hook
+  const voiceRecognition = useVoiceRecognition();
+  
+  // Update isRecording when voice recognition state changes
+  useEffect(() => {
+    setIsRecording(voiceRecognition.isListening);
+  }, [voiceRecognition.isListening]);
+  
+  // Handle voice transcript
+  const handleVoiceTranscript = useCallback((transcript) => {
+    if (transcript.trim()) {
+      setInputValue(prev => prev + (prev ? ' ' : '') + transcript);
+      toast.success("ভয়েস ইনপুট সম্পন্ন!");
+      // Focus the input after voice input
+      inputRef.current?.focus();
+    }
+  }, []);
   
   // Scroll to bottom of messages
   const scrollToBottom = useCallback(() => {
