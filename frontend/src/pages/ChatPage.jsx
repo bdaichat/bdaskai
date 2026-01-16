@@ -455,7 +455,8 @@ const WelcomeScreen = ({ onSuggestionClick }) => {
         স্বাগতম বিডিআস্কে!
       </h2>
       <p className="text-muted-foreground bangla-body mb-8 max-w-md">
-        আমি আপনার বাংলাদেশী AI সহকারী। যেকোনো প্রশ্ন করুন - বাংলা বা ইংরেজিতে।
+        আমি আপনার বাংলাদেশী AI সহকারী। যেকোনো প্রশ্ন করুন - বাংলা বা ইংরেজিতে। 
+        <span className="text-primary font-medium"> মাইক বাটনে ক্লিক করে কথাও বলতে পারেন!</span>
       </p>
       
       {/* Suggestions */}
