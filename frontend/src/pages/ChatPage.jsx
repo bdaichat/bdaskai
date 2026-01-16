@@ -470,15 +470,16 @@ export default function ChatPage() {
       />
       
       {/* Main chat area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 relative z-10">
         {/* Header */}
-        <header className="flex items-center justify-between px-4 py-3 glass-card rounded-none lg:rounded-b-2xl border-b border-border/50 lg:mx-4 lg:mt-4">
+        <header className="flex items-center justify-between px-4 py-3 glass-card rounded-none lg:rounded-b-2xl border-b border-border/50 lg:mx-4 lg:mt-4 relative z-20">
           <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden"
+              className="lg:hidden relative z-30"
+              aria-label="Open menu"
             >
               <Menu className="w-5 h-5" />
             </Button>
