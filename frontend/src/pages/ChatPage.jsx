@@ -129,10 +129,9 @@ const Sidebar = ({
       {/* Sidebar */}
       <motion.aside
         initial={false}
-        animate={{ x: isOpen ? 0 : (typeof window !== 'undefined' && window.innerWidth >= 1024) ? 0 : '-100%' }}
-        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
         className={`fixed lg:static inset-y-0 left-0 z-50 w-72 glass-card rounded-none lg:rounded-2xl lg:m-4 lg:h-[calc(100vh-2rem)]
-                    flex flex-col transition-transform lg:transform-none ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
+                    flex flex-col ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
+        style={{ transition: 'transform 0.3s ease-in-out' }}
       >
         {/* Header */}
         <div className="p-4 border-b border-border/50">
