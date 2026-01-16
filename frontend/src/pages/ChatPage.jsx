@@ -790,13 +790,24 @@ export default function ChatPage() {
         {/* Input area */}
         <div className="p-4 lg:px-6">
           <form onSubmit={handleSubmit} className="relative">
+            {/* Voice Recording Indicator */}
+            <AnimatePresence>
+              <VoiceRecordingIndicator isRecording={isRecording} />
+            </AnimatePresence>
+            
             <div className="glass-card p-2 flex items-end gap-2">
+              {/* Voice Input Button */}
+              <VoiceInputButton 
+                onTranscript={handleVoiceTranscript}
+                disabled={isLoading}
+              />
+              
               <textarea
                 ref={inputRef}
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="আপনার বার্তা লিখুন..."
+                placeholder={isRecording ? "শুনছি..." : "আপনার বার্তা লিখুন বা কথা বলুন..."}
                 rows={1}
                 className="flex-1 glass-input resize-none min-h-[44px] max-h-32 py-3 bangla-body text-sm md:text-base"
                 style={{ 
@@ -804,13 +815,13 @@ export default function ChatPage() {
                   minHeight: '44px',
                   maxHeight: '128px'
                 }}
-                disabled={isLoading}
+                disabled={isLoading || isRecording}
               />
               <Button
                 type="submit"
                 variant="primary"
                 size="icon-lg"
-                disabled={!inputValue.trim() || isLoading}
+                disabled={!inputValue.trim() || isLoading || isRecording}
                 className="flex-shrink-0 rounded-xl"
               >
                 <Send className="w-5 h-5" />
