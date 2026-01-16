@@ -15,7 +15,10 @@ import {
   BookOpen,
   Lightbulb,
   Moon,
-  Sun
+  Sun,
+  Mic,
+  MicOff,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
