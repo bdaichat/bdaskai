@@ -1,4 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Noto+Sans+Bengali:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+/* BdAsk Bengali AI - Enhanced Typography & Mobile Optimization */
+
+/* Import Bengali fonts with proper ligature support */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@300;400;500;600;700&family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* Additional Bengali font - SolaimanLipi from CDN */
+@font-face {
+  font-family: 'SolaimanLipi';
+  src: url('https://cdn.jsdelivr.net/gh/nicsedu/web-fonts@master/SolaimanLipi.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 
 @tailwind base;
 @tailwind components;
@@ -139,18 +151,74 @@
     
     body {
         @apply bg-background text-foreground;
-        font-family: 'Hind Siliguri', 'Noto Sans Bengali', 'Inter', sans-serif;
+        /* Enhanced Bengali Font Stack with ligature support */
+        font-family: 'SolaimanLipi', 'Noto Sans Bengali', 'Hind Siliguri', 'Inter', system-ui, sans-serif;
+        font-feature-settings: "liga" 1, "calt" 1, "kern" 1;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
     }
     
-    /* Bengali text specific */
-    .bangla-text {
-        font-family: 'Hind Siliguri', 'Noto Sans Bengali', sans-serif;
+    /* Bengali text specific - enhanced for proper conjunct rendering */
+    .bangla-text,
+    .bangla-body {
+        font-family: 'SolaimanLipi', 'Noto Sans Bengali', 'Hind Siliguri', sans-serif;
+        font-feature-settings: "liga" 1, "calt" 1;
         line-height: 1.8;
+        letter-spacing: 0.01em;
+    }
+    
+    .bangla-heading {
+        font-family: 'SolaimanLipi', 'Noto Sans Bengali', 'Hind Siliguri', sans-serif;
+        font-feature-settings: "liga" 1, "calt" 1;
+        font-weight: 600;
+        line-height: 1.4;
     }
 }
 
+/* ==========================================
+   MOBILE OPTIMIZATION - Touch Targets & iOS
+   ========================================== */
+@layer components {
+    /* Touch target minimum 44px for accessibility */
+    .touch-target {
+        min-width: 44px;
+        min-height: 44px;
+        touch-action: manipulation;
+    }
+    
+    .touch-target-sm {
+        min-width: 36px;
+        min-height: 36px;
+        touch-action: manipulation;
+    }
+    
+    /* Prevent iOS zoom on input focus - 16px minimum */
+    .mobile-input {
+        font-size: 16px !important;
+        touch-action: manipulation;
+    }
+    
+    @media (max-width: 768px) {
+        input, textarea, select, button {
+            font-size: 16px;
+            touch-action: manipulation;
+        }
+        
+        /* Larger touch targets on mobile */
+        button, 
+        [role="button"],
+        .suggestion-chip {
+            min-height: 44px;
+            padding-top: 12px;
+            padding-bottom: 12px;
+        }
+    }
+}
+
+/* ==========================================
+   GLASSMORPHISM COMPONENTS
+   ========================================== */
 @layer components {
     /* Glassmorphism Card */
     .glass-card {
@@ -185,12 +253,18 @@
         -webkit-backdrop-filter: blur(10px);
         border: 1px solid hsl(var(--border) / 0.5);
         transition: all var(--transition-smooth);
+        font-family: 'SolaimanLipi', 'Noto Sans Bengali', 'Hind Siliguri', sans-serif;
     }
     
     .glass-input:focus {
         @apply outline-none;
         border-color: hsl(var(--primary));
         box-shadow: 0 0 0 3px hsl(var(--primary) / 0.15);
+    }
+    
+    .glass-input::placeholder {
+        color: hsl(var(--muted-foreground));
+        opacity: 0.7;
     }
     
     /* Glass Button */
@@ -203,6 +277,7 @@
         border: 1px solid hsl(0 0% 100% / 0.2);
         box-shadow: var(--shadow-md), inset 0 1px 0 hsl(0 0% 100% / 0.2);
         transition: all var(--transition-smooth);
+        touch-action: manipulation;
     }
     
     .glass-button:hover {
@@ -214,7 +289,7 @@
         transform: translateY(0);
     }
     
-    /* Chat Bubble */
+    /* Chat Bubbles */
     .chat-bubble-user {
         @apply rounded-2xl rounded-br-md px-4 py-3;
         background: linear-gradient(135deg, 
@@ -233,6 +308,16 @@
         box-shadow: var(--shadow-sm);
     }
     
+    /* Weather Card - Glassmorphism */
+    .weather-card {
+        background: linear-gradient(135deg, 
+            hsl(var(--card) / 0.95) 0%, 
+            hsl(var(--primary-light) / 0.3) 100%);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid hsl(var(--primary) / 0.2);
+    }
+    
     /* Suggestion Chips */
     .suggestion-chip {
         @apply inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium;
@@ -241,26 +326,34 @@
         border: 1px solid hsl(var(--border) / 0.5);
         transition: all var(--transition-smooth);
         cursor: pointer;
+        touch-action: manipulation;
+        font-family: 'SolaimanLipi', 'Noto Sans Bengali', 'Hind Siliguri', sans-serif;
     }
     
     .suggestion-chip:hover {
         background: hsl(var(--primary-light));
         border-color: hsl(var(--primary) / 0.3);
         color: hsl(var(--primary));
+        transform: translateY(-1px);
     }
     
+    .suggestion-chip:active {
+        transform: translateY(0);
+    }
+}
+
+/* ==========================================
+   ANIMATIONS
+   ========================================== */
+@layer components {
     /* Floating Animation */
     .float-animation {
         animation: float 6s ease-in-out infinite;
     }
     
     @keyframes float {
-        0%, 100% {
-            transform: translateY(0px);
-        }
-        50% {
-            transform: translateY(-10px);
-        }
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
     }
     
     /* Pulse Glow */
@@ -269,12 +362,8 @@
     }
     
     @keyframes pulse-glow {
-        0%, 100% {
-            box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
-        }
-        50% {
-            box-shadow: 0 0 40px hsl(var(--primary) / 0.5);
-        }
+        0%, 100% { box-shadow: 0 0 20px hsl(var(--primary) / 0.3); }
+        50% { box-shadow: 0 0 40px hsl(var(--primary) / 0.5); }
     }
     
     /* Voice Recording Pulse */
@@ -283,12 +372,8 @@
     }
     
     @keyframes voice-pulse {
-        0%, 100% {
-            box-shadow: 0 0 0 0 hsl(var(--destructive) / 0.4);
-        }
-        50% {
-            box-shadow: 0 0 0 15px hsl(var(--destructive) / 0);
-        }
+        0%, 100% { box-shadow: 0 0 0 0 hsl(var(--destructive) / 0.4); }
+        50% { box-shadow: 0 0 0 15px hsl(var(--destructive) / 0); }
     }
     
     /* Voice Wave Animation */
@@ -321,24 +406,30 @@
         animation: typing-bounce 1.4s infinite ease-in-out both;
     }
     
-    .typing-dot:nth-child(1) {
-        animation-delay: -0.32s;
-    }
-    
-    .typing-dot:nth-child(2) {
-        animation-delay: -0.16s;
-    }
+    .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .typing-dot:nth-child(2) { animation-delay: -0.16s; }
     
     @keyframes typing-bounce {
-        0%, 80%, 100% {
-            transform: scale(0);
-        }
-        40% {
-            transform: scale(1);
-        }
+        0%, 80%, 100% { transform: scale(0); }
+        40% { transform: scale(1); }
     }
     
-    /* Scrollbar */
+    /* Soft pulse for background elements */
+    .animate-pulse-soft {
+        animation: pulse-soft 4s ease-in-out infinite;
+    }
+    
+    @keyframes pulse-soft {
+        0%, 100% { opacity: 0.5; transform: scale(1); }
+        50% { opacity: 0.8; transform: scale(1.05); }
+    }
+}
+
+/* ==========================================
+   SCROLLBAR & UTILITIES
+   ========================================== */
+@layer components {
+    /* Custom Scrollbar */
     .custom-scrollbar::-webkit-scrollbar {
         width: 6px;
     }
@@ -363,6 +454,9 @@
     }
 }
 
+/* ==========================================
+   DEBUG WRAPPER (Emergent Platform)
+   ========================================== */
 @layer base {
     [data-debug-wrapper="true"] {
         display: contents !important;

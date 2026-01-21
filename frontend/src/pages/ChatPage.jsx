@@ -1,500 +1,165 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Send, 
-  Plus, 
-  MessageCircle, 
-  Sparkles, 
-  Trash2, 
-  Menu,
-  X,
-  Bot,
-  User,
-  Newspaper,
-  HelpCircle,
-  BookOpen,
-  Lightbulb,
-  Moon,
-  Sun,
-  Mic,
-  MicOff,
-  Loader2
-} from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
+import { Menu, Sparkles, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import axios from "axios";
+
+// Import refactored components
+import { Sidebar, ChatWindow, SuggestionChips, WelcomeScreen } from "@/components/chat";
+import useVoiceInput from "@/hooks/useVoiceInput";
+import { fetchWeather, isWeatherQuery } from "@/services/weatherService";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-// Suggestion categories with Bengali text
-const SUGGESTIONS = [
-  {
-    icon: Newspaper,
-    text: "আজকের খবর কি?",
-    category: "news"
-  },
-  {
-    icon: HelpCircle,
-    text: "বাংলাদেশ সম্পর্কে বলুন",
-    category: "knowledge"
-  },
-  {
-    icon: BookOpen,
-    text: "একটি গল্প লিখুন",
-    category: "creative"
-  },
-  {
-    icon: Lightbulb,
-    text: "নতুন কিছু শিখতে চাই",
-    category: "education"
-  },
-  {
-    icon: Sparkles,
-    text: "আজ আমাকে অনুপ্রাণিত করুন",
-    category: "motivation"
-  },
-  {
-    icon: MessageCircle,
-    text: "কথা বলতে চাই",
-    category: "chat"
-  }
-];
-
-// Voice Recognition Hook
-const useVoiceRecognition = () => {
-  const [isListening, setIsListening] = useState(false);
-  const [transcript, setTranscript] = useState("");
-  const [isSupported, setIsSupported] = useState(false);
-  const [error, setError] = useState(null);
-  const recognitionRef = useRef(null);
-
-  useEffect(() => {
-    // Check if browser supports speech recognition
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    
-    if (SpeechRecognition) {
-      setIsSupported(true);
-      const recognition = new SpeechRecognition();
-      
-      // Configure for Bengali
-      recognition.lang = 'bn-BD'; // Bengali (Bangladesh)
-      recognition.continuous = false;
-      recognition.interimResults = true;
-      recognition.maxAlternatives = 1;
-
-      recognition.onresult = (event) => {
-        let finalTranscript = '';
-        let interimTranscript = '';
-        
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const result = event.results[i];
-          if (result.isFinal) {
-            finalTranscript += result[0].transcript;
-          } else {
-            interimTranscript += result[0].transcript;
-          }
-        }
-        
-        setTranscript(finalTranscript || interimTranscript);
-      };
-
-      recognition.onstart = () => {
-        setIsListening(true);
-        setError(null);
-      };
-
-      recognition.onend = () => {
-        setIsListening(false);
-      };
-
-      recognition.onerror = (event) => {
-        setError(event.error);
-        setIsListening(false);
-        
-        if (event.error === 'not-allowed') {
-          toast.error("মাইক্রোফোন অনুমতি দেওয়া হয়নি। দয়া করে ব্রাউজার সেটিংস থেকে অনুমতি দিন।");
-        } else if (event.error === 'no-speech') {
-          toast.error("কোনো কথা শোনা যায়নি। আবার চেষ্টা করুন।");
-        } else if (event.error === 'network') {
-          toast.error("নেটওয়ার্ক সমস্যা। ইন্টারনেট সংযোগ পরীক্ষা করুন।");
-        }
-      };
-
-      recognitionRef.current = recognition;
-    } else {
-      setIsSupported(false);
-    }
-
-    return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.abort();
-      }
-    };
-  }, []);
-
-  const startListening = useCallback(() => {
-    if (recognitionRef.current && !isListening) {
-      setTranscript("");
-      try {
-        recognitionRef.current.start();
-      } catch (e) {
-        // Already started
-        console.log("Recognition already started");
-      }
-    }
-  }, [isListening]);
-
-  const stopListening = useCallback(() => {
-    if (recognitionRef.current && isListening) {
-      recognitionRef.current.stop();
-    }
-  }, [isListening]);
-
-  const toggleListening = useCallback(() => {
-    if (isListening) {
-      stopListening();
-    } else {
-      startListening();
-    }
-  }, [isListening, startListening, stopListening]);
-
-  return {
-    isListening,
-    transcript,
-    isSupported,
-    error,
-    startListening,
-    stopListening,
-    toggleListening,
-    resetTranscript: () => setTranscript("")
-  };
-};
-
-// Voice Input Button Component
-const VoiceInputButton = ({ onTranscript, disabled }) => {
-  const { 
-    isListening, 
-    transcript, 
-    isSupported, 
-    toggleListening,
-    resetTranscript 
-  } = useVoiceRecognition();
-
-  // Send transcript to parent when recording stops
-  useEffect(() => {
-    if (!isListening && transcript) {
-      onTranscript(transcript);
-      resetTranscript();
-    }
-  }, [isListening, transcript, onTranscript, resetTranscript]);
-
-  if (!isSupported) {
-    return (
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-lg"
-        disabled
-        className="flex-shrink-0 rounded-xl opacity-50"
-        title="আপনার ব্রাউজার ভয়েস ইনপুট সমর্থন করে না"
-      >
-        <MicOff className="w-5 h-5 text-muted-foreground" />
-      </Button>
-    );
-  }
-
-  return (
-    <Button
-      type="button"
-      variant={isListening ? "destructive" : "glass"}
-      size="icon-lg"
-      onClick={toggleListening}
-      disabled={disabled}
-      className={`flex-shrink-0 rounded-xl transition-all duration-300 ${
-        isListening ? 'animate-pulse bg-destructive shadow-glow' : ''
-      }`}
-      title={isListening ? "থামান" : "কথা বলুন"}
-    >
-      {isListening ? (
-        <motion.div
-          initial={{ scale: 0.8 }}
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ repeat: Infinity, duration: 1 }}
-        >
-          <Mic className="w-5 h-5" />
-        </motion.div>
-      ) : (
-        <Mic className="w-5 h-5" />
-      )}
-    </Button>
-  );
-};
-
-// Voice Recording Indicator
-const VoiceRecordingIndicator = ({ isRecording }) => {
-  if (!isRecording) return null;
-  
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 10 }}
-      className="absolute -top-16 left-1/2 transform -translate-x-1/2 glass-card px-4 py-2 flex items-center gap-3"
-    >
-      <motion.div
-        animate={{ scale: [1, 1.2, 1] }}
-        transition={{ repeat: Infinity, duration: 0.8 }}
-        className="w-3 h-3 rounded-full bg-destructive"
-      />
-      <span className="text-sm bangla-body text-foreground">
-        শুনছি... বাংলায় বলুন
-      </span>
-      <div className="flex gap-1">
-        {[0, 1, 2, 3].map((i) => (
-          <motion.div
-            key={i}
-            className="w-1 bg-primary rounded-full"
-            animate={{ 
-              height: [8, 16, 8],
-            }}
-            transition={{ 
-              repeat: Infinity, 
-              duration: 0.5, 
-              delay: i * 0.1,
-              ease: "easeInOut"
-            }}
-          />
-        ))}
-      </div>
-    </motion.div>
-  );
-};
-
-// Typing indicator component
-const TypingIndicator = () => (
-  <div className="flex items-center gap-1 px-4 py-2">
-    <span className="typing-dot text-primary"></span>
-    <span className="typing-dot text-primary"></span>
-    <span className="typing-dot text-primary"></span>
-  </div>
-);
-
-// Message bubble component
-const MessageBubble = ({ message, isUser }) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.3 }}
-      className={`flex items-start gap-3 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
-    >
-      {/* Avatar */}
-      <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-        isUser 
-          ? 'bg-gradient-to-br from-primary to-accent' 
-          : 'glass-card'
-      }`}>
-        {isUser ? (
-          <User className="w-4 h-4 text-primary-foreground" />
-        ) : (
-          <Bot className="w-4 h-4 text-primary" />
-        )}
-      </div>
-      
-      {/* Message */}
-      <div className={`max-w-[75%] ${isUser ? 'chat-bubble-user' : 'chat-bubble-ai'}`}>
-        <p className="bangla-body text-sm md:text-base whitespace-pre-wrap">
-          {message.content}
-        </p>
-      </div>
-    </motion.div>
-  );
-};
-
-// Sidebar component
-const Sidebar = ({ 
-  sessions, 
-  currentSessionId, 
-  onSelectSession, 
-  onNewSession, 
-  onDeleteSession,
-  isOpen,
-  onClose 
-}) => {
-  return (
-    <>
-      {/* Overlay for mobile */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-foreground/20 backdrop-blur-sm z-40 lg:hidden"
-            onClick={onClose}
-          />
-        )}
-      </AnimatePresence>
-      
-      {/* Sidebar */}
-      <motion.aside
-        initial={false}
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-72 glass-card rounded-none lg:rounded-2xl lg:m-4 lg:h-[calc(100vh-2rem)]
-                    flex flex-col ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
-        style={{ transition: 'transform 0.3s ease-in-out' }}
-      >
-        {/* Header */}
-        <div className="p-4 border-b border-border/50">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-glow">
-                <Sparkles className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="font-bold text-lg text-foreground bangla-heading">বিডিআস্ক</h1>
-                <p className="text-xs text-muted-foreground">AI সহকারী</p>
-              </div>
-            </div>
-            <Button 
-              variant="ghost" 
-              size="icon-sm"
-              onClick={onClose}
-              className="lg:hidden"
-            >
-              <X className="w-5 h-5" />
-            </Button>
-          </div>
-          
-          <Button 
-            variant="primary" 
-            className="w-full mt-4"
-            onClick={onNewSession}
-          >
-            <Plus className="w-4 h-4" />
-            <span className="bangla-body">নতুন কথোপকথন</span>
-          </Button>
-        </div>
-        
-        {/* Sessions list */}
-        <ScrollArea className="flex-1 p-3">
-          <div className="space-y-2">
-            <AnimatePresence mode="popLayout">
-              {sessions.map((session) => (
-                <motion.div
-                  key={session.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  layout
-                >
-                  <button
-                    onClick={() => onSelectSession(session.id)}
-                    className={`w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-all duration-200 ${
-                      currentSessionId === session.id
-                        ? 'bg-primary/10 border border-primary/30'
-                        : 'hover:bg-secondary border border-transparent'
-                    }`}
-                  >
-                    <MessageCircle className={`w-4 h-4 flex-shrink-0 ${
-                      currentSessionId === session.id ? 'text-primary' : 'text-muted-foreground'
-                    }`} />
-                    <span className={`flex-1 truncate text-sm bangla-body ${
-                      currentSessionId === session.id ? 'text-primary font-medium' : 'text-foreground'
-                    }`}>
-                      {session.title}
-                    </span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDeleteSession(session.id);
-                      }}
-                      className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-destructive/10 hover:text-destructive transition-all"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </button>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
-        </ScrollArea>
-        
-        {/* Footer */}
-        <div className="p-4 border-t border-border/50">
-          <p className="text-xs text-center text-muted-foreground bangla-body">
-            বাংলাদেশের জন্য তৈরি ❤️
-          </p>
-        </div>
-      </motion.aside>
-    </>
-  );
-};
-
-// Welcome screen component
-const WelcomeScreen = ({ onSuggestionClick }) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex-1 flex flex-col items-center justify-center p-6 text-center"
-    >
-      {/* Logo */}
-      <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-        className="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-glow mb-6"
-      >
-        <Bot className="w-10 h-10 text-primary-foreground" />
-      </motion.div>
-      
-      <h2 className="text-2xl md:text-3xl font-bold text-foreground bangla-heading mb-2">
-        স্বাগতম বিডিআস্কে!
-      </h2>
-      <p className="text-muted-foreground bangla-body mb-8 max-w-md">
-        আমি আপনার বাংলাদেশী AI সহকারী। যেকোনো প্রশ্ন করুন - বাংলা বা ইংরেজিতে। 
-        <span className="text-primary font-medium"> মাইক বাটনে ক্লিক করে কথাও বলতে পারেন!</span>
-      </p>
-      
-      {/* Suggestions */}
-      <div className="w-full max-w-2xl">
-        <p className="text-sm text-muted-foreground mb-4 bangla-body">
-          শুরু করতে একটি বিষয় বেছে নিন:
-        </p>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {SUGGESTIONS.map((suggestion, index) => (
-            <motion.button
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 + index * 0.1 }}
-              onClick={() => onSuggestionClick(suggestion.text)}
-              className="suggestion-chip flex flex-col items-center gap-2 p-4 h-auto"
-            >
-              <suggestion.icon className="w-5 h-5 text-primary" />
-              <span className="text-xs bangla-body text-center">{suggestion.text}</span>
-            </motion.button>
-          ))}
-        </div>
-      </div>
-    </motion.div>
-  );
-};
-
-// Animated background component
+/**
+ * Animated Background Component
+ */
 const AnimatedBackground = () => (
   <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-    {/* Gradient orbs */}
     <div className="absolute top-0 -left-40 w-80 h-80 bg-primary/20 rounded-full filter blur-[100px] animate-pulse-soft" />
     <div className="absolute top-1/3 -right-20 w-60 h-60 bg-accent/20 rounded-full filter blur-[80px] animate-pulse-soft" style={{ animationDelay: '1s' }} />
     <div className="absolute bottom-0 left-1/3 w-72 h-72 bg-primary-glow/15 rounded-full filter blur-[90px] animate-pulse-soft" style={{ animationDelay: '2s' }} />
   </div>
 );
 
-// Main ChatPage component
+/**
+ * Message Input Component (inline for better state management)
+ */
+const MessageInputArea = ({ 
+  onSendMessage, 
+  isLoading, 
+  isRecording, 
+  setIsRecording,
+  inputValue,
+  setInputValue
+}) => {
+  const inputRef = React.useRef(null);
+  const voiceInput = useVoiceInput();
+  
+  // Update recording state
+  useEffect(() => {
+    setIsRecording(voiceInput.isListening);
+  }, [voiceInput.isListening, setIsRecording]);
+
+  // Handle voice transcript
+  useEffect(() => {
+    if (!voiceInput.isListening && voiceInput.transcript) {
+      setInputValue(prev => prev + (prev ? ' ' : '') + voiceInput.transcript);
+      voiceInput.resetTranscript();
+      toast.success("ভয়েস ইনপুট সম্পন্ন!");
+      inputRef.current?.focus();
+    }
+  }, [voiceInput.isListening, voiceInput.transcript, voiceInput.resetTranscript, setInputValue]);
+  
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (inputValue.trim() && !isLoading && !isRecording) {
+      onSendMessage(inputValue);
+      setInputValue("");
+    }
+  };
+  
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  };
+
+  return (
+    <div className="p-4 lg:px-6">
+      <form onSubmit={handleSubmit} className="relative">
+        {/* Voice Recording Indicator */}
+        {isRecording && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="absolute -top-16 left-1/2 transform -translate-x-1/2 glass-card px-4 py-2 flex items-center gap-3"
+          >
+            <motion.div
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ repeat: Infinity, duration: 0.8 }}
+              className="w-3 h-3 rounded-full bg-destructive"
+            />
+            <span className="text-sm bangla-body text-foreground">শুনছি... বাংলায় বলুন</span>
+            <div className="flex gap-1">
+              {[0, 1, 2, 3].map((i) => (
+                <motion.div
+                  key={i}
+                  className="w-1 bg-primary rounded-full"
+                  animate={{ height: [8, 16, 8] }}
+                  transition={{ repeat: Infinity, duration: 0.5, delay: i * 0.1 }}
+                />
+              ))}
+            </div>
+          </motion.div>
+        )}
+        
+        <div className="glass-card p-2 flex items-end gap-2">
+          {/* Voice Input Button */}
+          <Button
+            type="button"
+            variant={voiceInput.isListening ? "destructive" : "glass"}
+            size="icon-lg"
+            onClick={voiceInput.toggleListening}
+            disabled={isLoading || !voiceInput.isSupported}
+            className={`flex-shrink-0 rounded-xl transition-all duration-300 touch-target ${
+              voiceInput.isListening ? 'animate-pulse bg-destructive shadow-glow' : ''
+            }`}
+            title={voiceInput.isListening ? "থামান" : "কথা বলুন"}
+          >
+            {voiceInput.isListening ? (
+              <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1 }}>
+                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/>
+                </svg>
+              </motion.div>
+            ) : (
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/>
+              </svg>
+            )}
+          </Button>
+          
+          <textarea
+            ref={inputRef}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={isRecording ? "শুনছি..." : "আপনার বার্তা লিখুন বা কথা বলুন..."}
+            rows={1}
+            className="flex-1 glass-input resize-none min-h-[44px] max-h-32 py-3 bangla-body mobile-input"
+            style={{ height: 'auto', minHeight: '44px', maxHeight: '128px' }}
+            disabled={isLoading || isRecording}
+          />
+          <Button
+            type="submit"
+            variant="primary"
+            size="icon-lg"
+            disabled={!inputValue.trim() || isLoading || isRecording}
+            className="flex-shrink-0 rounded-xl touch-target"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>
+            </svg>
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+// Need React for useRef
+import React from "react";
+
+/**
+ * Main Chat Page Component
+ */
 export default function ChatPage() {
   const [sessions, setSessions] = useState([]);
   const [currentSessionId, setCurrentSessionId] = useState(null);
@@ -505,45 +170,14 @@ export default function ChatPage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   
-  const messagesEndRef = useRef(null);
-  const inputRef = useRef(null);
-  
-  // Voice recognition hook
-  const voiceRecognition = useVoiceRecognition();
-  
-  // Update isRecording when voice recognition state changes
-  useEffect(() => {
-    setIsRecording(voiceRecognition.isListening);
-  }, [voiceRecognition.isListening]);
-  
-  // Handle voice transcript
-  const handleVoiceTranscript = useCallback((transcript) => {
-    if (transcript.trim()) {
-      setInputValue(prev => prev + (prev ? ' ' : '') + transcript);
-      toast.success("ভয়েস ইনপুট সম্পন্ন!");
-      // Focus the input after voice input
-      inputRef.current?.focus();
-    }
-  }, []);
-  
-  // Scroll to bottom of messages
-  const scrollToBottom = useCallback(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, []);
-  
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, scrollToBottom]);
+  // Get last message for smart suggestions
+  const lastMessage = messages.length > 0 ? messages[messages.length - 1].content : "";
   
   // Toggle dark mode
   const toggleDarkMode = useCallback(() => {
     const newMode = !isDarkMode;
     setIsDarkMode(newMode);
-    if (newMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    document.documentElement.classList.toggle('dark', newMode);
   }, [isDarkMode]);
   
   // Fetch sessions on mount
@@ -580,9 +214,7 @@ export default function ChatPage() {
   
   const createNewSession = async () => {
     try {
-      const response = await axios.post(`${API}/chat/session`, {
-        title: "নতুন কথোপকথন"
-      });
+      const response = await axios.post(`${API}/chat/session`, { title: "নতুন কথোপকথন" });
       setSessions([response.data, ...sessions]);
       setCurrentSessionId(response.data.id);
       setMessages([]);
@@ -642,45 +274,43 @@ export default function ChatPage() {
     setIsLoading(true);
     
     try {
+      // Check if it's a weather query and fetch weather data
+      let weatherData = null;
+      if (isWeatherQuery(content)) {
+        try {
+          weatherData = await fetchWeather(content);
+        } catch (e) {
+          console.log("Weather fetch failed:", e);
+        }
+      }
+      
       const response = await axios.post(`${API}/chat/send`, {
         session_id: sessionId,
         message: content
       });
       
-      // Add AI response
+      // Add AI response with weather data if available
       const aiMessage = {
         id: (Date.now() + 1).toString(),
         session_id: sessionId,
         role: "assistant",
         content: response.data.response,
-        timestamp: response.data.timestamp
+        timestamp: response.data.timestamp,
+        weather: weatherData // Attach weather data if available
       };
       setMessages(prev => [...prev, aiMessage]);
       
     } catch (error) {
       console.error("Error sending message:", error);
       toast.error("বার্তা পাঠাতে সমস্যা হয়েছে। আবার চেষ্টা করুন।");
-      // Remove the user message if failed
       setMessages(prev => prev.filter(m => m.id !== userMessage.id));
     } finally {
       setIsLoading(false);
     }
   };
   
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    sendMessage(inputValue);
-  };
-  
   const handleSuggestionClick = (text) => {
     sendMessage(text);
-  };
-  
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit(e);
-    }
   };
   
   return (
@@ -711,7 +341,7 @@ export default function ChatPage() {
               variant="ghost"
               size="icon"
               onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden relative z-30"
+              className="lg:hidden relative z-30 touch-target"
               aria-label="Open menu"
             >
               <Menu className="w-5 h-5" />
@@ -739,13 +369,9 @@ export default function ChatPage() {
               variant="ghost"
               size="icon"
               onClick={toggleDarkMode}
-              className="rounded-full"
+              className="rounded-full touch-target"
             >
-              {isDarkMode ? (
-                <Sun className="w-5 h-5" />
-              ) : (
-                <Moon className="w-5 h-5" />
-              )}
+              {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </Button>
           </div>
         </header>
@@ -755,102 +381,30 @@ export default function ChatPage() {
           {messages.length === 0 && !currentSessionId ? (
             <WelcomeScreen onSuggestionClick={handleSuggestionClick} />
           ) : (
-            <ScrollArea className="h-full custom-scrollbar">
-              <div className="p-4 space-y-4 pb-6">
-                <AnimatePresence mode="popLayout">
-                  {messages.map((message) => (
-                    <MessageBubble
-                      key={message.id}
-                      message={message}
-                      isUser={message.role === 'user'}
-                    />
-                  ))}
-                </AnimatePresence>
-                
-                {isLoading && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex items-start gap-3"
-                  >
-                    <div className="w-8 h-8 rounded-full glass-card flex items-center justify-center">
-                      <Bot className="w-4 h-4 text-primary" />
-                    </div>
-                    <div className="chat-bubble-ai">
-                      <TypingIndicator />
-                    </div>
-                  </motion.div>
-                )}
-                
-                <div ref={messagesEndRef} />
-              </div>
-            </ScrollArea>
+            <ChatWindow messages={messages} isLoading={isLoading} />
           )}
         </div>
         
         {/* Input area */}
-        <div className="p-4 lg:px-6">
-          <form onSubmit={handleSubmit} className="relative">
-            {/* Voice Recording Indicator */}
-            <AnimatePresence>
-              <VoiceRecordingIndicator isRecording={isRecording} />
-            </AnimatePresence>
-            
-            <div className="glass-card p-2 flex items-end gap-2">
-              {/* Voice Input Button */}
-              <VoiceInputButton 
-                onTranscript={handleVoiceTranscript}
-                disabled={isLoading}
-              />
-              
-              <textarea
-                ref={inputRef}
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={isRecording ? "শুনছি..." : "আপনার বার্তা লিখুন বা কথা বলুন..."}
-                rows={1}
-                className="flex-1 glass-input resize-none min-h-[44px] max-h-32 py-3 bangla-body text-sm md:text-base"
-                style={{ 
-                  height: 'auto',
-                  minHeight: '44px',
-                  maxHeight: '128px'
-                }}
-                disabled={isLoading || isRecording}
-              />
-              <Button
-                type="submit"
-                variant="primary"
-                size="icon-lg"
-                disabled={!inputValue.trim() || isLoading || isRecording}
-                className="flex-shrink-0 rounded-xl"
-              >
-                <Send className="w-5 h-5" />
-              </Button>
-            </div>
-          </form>
-          
-          {/* Quick suggestions when in conversation */}
-          {currentSessionId && messages.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mt-3 flex flex-wrap gap-2 justify-center"
-            >
-              {SUGGESTIONS.slice(0, 3).map((suggestion, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleSuggestionClick(suggestion.text)}
-                  className="suggestion-chip text-xs py-1.5 px-3"
-                  disabled={isLoading}
-                >
-                  <suggestion.icon className="w-3.5 h-3.5" />
-                  <span className="bangla-body">{suggestion.text}</span>
-                </button>
-              ))}
-            </motion.div>
-          )}
-        </div>
+        <MessageInputArea
+          onSendMessage={sendMessage}
+          isLoading={isLoading}
+          isRecording={isRecording}
+          setIsRecording={setIsRecording}
+          inputValue={inputValue}
+          setInputValue={setInputValue}
+        />
+        
+        {/* Smart suggestions when in conversation */}
+        {currentSessionId && messages.length > 0 && !isLoading && (
+          <div className="px-4 pb-4 lg:px-6">
+            <SuggestionChips 
+              onSuggestionClick={handleSuggestionClick}
+              lastMessage={lastMessage}
+              isLoading={isLoading}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
