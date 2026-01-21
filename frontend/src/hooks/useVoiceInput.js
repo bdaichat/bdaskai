@@ -86,7 +86,6 @@ export const useVoiceInput = () => {
       };
 
       recognitionRef.current = recognition;
-    }
 
     return () => {
       if (recognitionRef.current) {
