@@ -36,22 +36,28 @@ const MessageInputArea = ({
   setInputValue
 }) => {
   const inputRef = React.useRef(null);
-  const voiceInput = useVoiceInput();
+  const { 
+    isListening, 
+    transcript, 
+    isSupported, 
+    toggleListening, 
+    resetTranscript 
+  } = useVoiceInput();
   
   // Update recording state
   useEffect(() => {
-    setIsRecording(voiceInput.isListening);
-  }, [voiceInput.isListening, setIsRecording]);
+    setIsRecording(isListening);
+  }, [isListening, setIsRecording]);
 
   // Handle voice transcript
   useEffect(() => {
-    if (!voiceInput.isListening && voiceInput.transcript) {
-      setInputValue(prev => prev + (prev ? ' ' : '') + voiceInput.transcript);
-      voiceInput.resetTranscript();
+    if (!isListening && transcript) {
+      setInputValue(prev => prev + (prev ? ' ' : '') + transcript);
+      resetTranscript();
       toast.success("ভয়েস ইনপুট সম্পন্ন!");
       inputRef.current?.focus();
     }
-  }, [voiceInput.isListening, voiceInput.transcript, voiceInput.resetTranscript, setInputValue]);
+  }, [isListening, transcript, resetTranscript, setInputValue]);
   
   const handleSubmit = (e) => {
     e.preventDefault();
