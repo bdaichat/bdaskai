@@ -9,18 +9,20 @@ export const useVoiceInput = () => {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [interimTranscript, setInterimTranscript] = useState("");
-  const [isSupported, setIsSupported] = useState(false);
   const [error, setError] = useState(null);
   const [confidence, setConfidence] = useState(0);
   const recognitionRef = useRef(null);
+  
+  // Check support synchronously during initialization
+  const SpeechRecognition = typeof window !== 'undefined' 
+    ? (window.SpeechRecognition || window.webkitSpeechRecognition) 
+    : null;
+  const isSupported = Boolean(SpeechRecognition);
 
   useEffect(() => {
-    // Check if browser supports speech recognition
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
     
-    if (SpeechRecognition) {
-      setIsSupported(true);
-      const recognition = new SpeechRecognition();
+    const recognition = new SpeechRecognition();
       
       // Configure for Bengali (Bangladesh)
       recognition.lang = 'bn-BD';
@@ -84,8 +86,6 @@ export const useVoiceInput = () => {
       };
 
       recognitionRef.current = recognition;
-    } else {
-      setIsSupported(false);
     }
 
     return () => {
@@ -93,7 +93,7 @@ export const useVoiceInput = () => {
         recognitionRef.current.abort();
       }
     };
-  }, []);
+  }, [SpeechRecognition]);
 
   const startListening = useCallback(() => {
     if (recognitionRef.current && !isListening) {
