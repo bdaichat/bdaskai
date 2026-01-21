@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from "react";
+import React, { useRef, useEffect, useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Mic, MicOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -126,7 +126,7 @@ export const MessageInput = ({
   setIsRecording 
 }) => {
   const inputRef = useRef(null);
-  const [inputValue, setInputValue] = React.useState("");
+  const [inputValue, setInputValue] = useState("");
   
   // Handle voice transcript
   const handleVoiceTranscript = useCallback((transcript) => {
@@ -198,8 +198,5 @@ export const MessageInput = ({
     </div>
   );
 };
-
-// Need to import React for useState
-import React from "react";
 
 export default MessageInput;
