@@ -108,16 +108,16 @@ const MessageInputArea = ({
           {/* Voice Input Button */}
           <Button
             type="button"
-            variant={voiceInput.isListening ? "destructive" : "glass"}
+            variant={isListening ? "destructive" : "glass"}
             size="icon-lg"
-            onClick={voiceInput.toggleListening}
-            disabled={isLoading || !voiceInput.isSupported}
+            onClick={toggleListening}
+            disabled={isLoading || !isSupported}
             className={`flex-shrink-0 rounded-xl transition-all duration-300 touch-target ${
-              voiceInput.isListening ? 'animate-pulse bg-destructive shadow-glow' : ''
+              isListening ? 'animate-pulse bg-destructive shadow-glow' : ''
             }`}
-            title={voiceInput.isListening ? "থামান" : "কথা বলুন"}
+            title={isListening ? "থামান" : "কথা বলুন"}
           >
-            {voiceInput.isListening ? (
+            {isListening ? (
               <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1 }}>
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
