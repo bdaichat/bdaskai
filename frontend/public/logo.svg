@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <!-- Premium Ocean Gradient -->
+    <linearGradient id="oceanGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0891b2;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#0d9488;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#14b8a6;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Glow Effect -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    
+    <!-- Inner Shadow -->
+    <filter id="innerShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feOffset dx="0" dy="2"/>
+      <feGaussianBlur stdDeviation="3" result="offset-blur"/>
+      <feComposite operator="out" in="SourceGraphic" in2="offset-blur" result="inverse"/>
+      <feFlood flood-color="white" flood-opacity="0.3" result="color"/>
+      <feComposite operator="in" in="color" in2="inverse" result="shadow"/>
+      <feComposite operator="over" in="shadow" in2="SourceGraphic"/>
+    </filter>
+    
+    <!-- Glass Reflection -->
+    <linearGradient id="glassReflection" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:white;stop-opacity:0.4" />
+      <stop offset="50%" style="stop-color:white;stop-opacity:0.1" />
+      <stop offset="100%" style="stop-color:white;stop-opacity:0" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background Circle with Gradient -->
+  <circle cx="256" cy="256" r="240" fill="url(#oceanGradient)" filter="url(#glow)"/>
+  
+  <!-- Glass Overlay -->
+  <ellipse cx="256" cy="180" rx="180" ry="120" fill="url(#glassReflection)" opacity="0.5"/>
+  
+  <!-- Chat Bubble Shape -->
+  <path d="M 160 180 
+           Q 160 120 220 120 
+           L 340 120 
+           Q 400 120 400 180 
+           L 400 280 
+           Q 400 340 340 340 
+           L 240 340 
+           L 180 400 
+           L 200 340 
+           L 220 340 
+           Q 160 340 160 280 
+           Z" 
+        fill="white" 
+        opacity="0.95"
+        filter="url(#innerShadow)"/>
+  
+  <!-- Bengali 'বি' stylized as AI dots -->
+  <g transform="translate(200, 170)">
+    <!-- Three AI dots representing intelligence -->
+    <circle cx="40" cy="50" r="18" fill="url(#oceanGradient)">
+      <animate attributeName="opacity" values="1;0.6;1" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="100" cy="50" r="18" fill="url(#oceanGradient)">
+      <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="160" cy="50" r="18" fill="url(#oceanGradient)">
+      <animate attributeName="opacity" values="1;0.6;1" dur="2s" repeatCount="indefinite" begin="0.5s"/>
+    </circle>
+    
+    <!-- Connecting line -->
+    <path d="M 58 50 L 82 50 M 118 50 L 142 50" 
+          stroke="url(#oceanGradient)" 
+          stroke-width="4" 
+          stroke-linecap="round"
+          opacity="0.6"/>
+  </g>
+  
+  <!-- Sparkle accent -->
+  <g transform="translate(370, 100)">
+    <path d="M 0 -20 L 5 -5 L 20 0 L 5 5 L 0 20 L -5 5 L -20 0 L -5 -5 Z" 
+          fill="white" 
+          opacity="0.9">
+      <animate attributeName="opacity" values="0.9;0.5;0.9" dur="1.5s" repeatCount="indefinite"/>
+      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="8s" repeatCount="indefinite"/>
+    </path>
+  </g>
+</svg>
