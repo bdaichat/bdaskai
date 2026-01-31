@@ -1,7 +1,5 @@
 import { motion } from "framer-motion";
 import { 
-  Bot, 
-  Sparkles, 
   Newspaper, 
   BookOpen, 
   Lightbulb, 
@@ -9,6 +7,7 @@ import {
   CloudSun,
   MessageCircle
 } from "lucide-react";
+import { Logo } from "@/components/Logo";
 
 // Premium Starter Cards Data
 const STARTER_CARDS = [
