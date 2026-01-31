@@ -231,11 +231,8 @@ export default function ChatPage() {
             
             <div className="flex items-center gap-3">
               {/* Mobile logo */}
-              <div className="relative lg:hidden">
-                <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary to-accent opacity-40 blur-md" />
-                <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-primary-foreground" />
-                </div>
+              <div className="lg:hidden">
+                <Logo size="sm" showText={false} animate={false} />
               </div>
               
               <div>
