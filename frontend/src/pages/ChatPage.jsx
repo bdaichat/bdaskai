@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Menu, Sparkles, Moon, Sun } from "lucide-react";
+import { Menu, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import axios from "axios";
@@ -13,6 +13,7 @@ import {
   SuggestionChips, 
   WelcomeScreen 
 } from "@/components/chat";
+import { Logo } from "@/components/Logo";
 import { fetchWeather, isWeatherQuery } from "@/services/weatherService";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
