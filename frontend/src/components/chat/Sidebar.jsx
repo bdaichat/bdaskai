@@ -2,13 +2,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { 
   Plus, 
   MessageCircle, 
-  Sparkles, 
   Trash2, 
   X,
   Clock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Logo } from "@/components/Logo";
 
 /**
  * Format relative time in Bengali
