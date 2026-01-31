@@ -95,35 +95,10 @@ export const WelcomeScreen = ({ onSuggestionClick }) => {
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6 overflow-y-auto">
       <div className="max-w-2xl w-full mx-auto text-center">
-        {/* Premium Logo with Glow */}
-        <motion.div
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ 
-            delay: 0.1, 
-            type: 'spring', 
-            stiffness: 200,
-            damping: 15
-          }}
-          className="relative w-24 h-24 mx-auto mb-8"
-        >
-          {/* Glow effect */}
-          <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary to-accent opacity-50 blur-xl animate-pulse-soft" />
-          
-          {/* Icon container */}
-          <div className="relative w-24 h-24 rounded-3xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-xl">
-            <Bot className="w-12 h-12 text-primary-foreground" />
-          </div>
-          
-          {/* Sparkle decorations */}
-          <motion.div 
-            animate={{ rotate: 360 }}
-            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-            className="absolute -top-2 -right-2"
-          >
-            <Sparkles className="w-6 h-6 text-primary" />
-          </motion.div>
-        </motion.div>
+        {/* Premium Logo with Animation */}
+        <div className="mb-8">
+          <Logo size="xl" showText={false} animate={true} className="justify-center" />
+        </div>
         
         {/* Welcome Text */}
         <motion.div
