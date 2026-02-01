@@ -48,6 +48,33 @@
         </script>
     </head>
     <body>
+        <!-- Suppress PostHog's known DataCloneError from error overlay -->
+        <script>
+            // This suppresses the error overlay for known third-party PostHog bugs
+            window.addEventListener('error', function(e) {
+                if (e.message && (
+                    e.message.includes('PerformanceServerTiming') ||
+                    e.message.includes('DataCloneError') ||
+                    e.message.includes('posthog')
+                )) {
+                    e.stopImmediatePropagation();
+                    e.preventDefault();
+                    return false;
+                }
+            }, true);
+            
+            // Also suppress unhandled rejections from PostHog
+            window.addEventListener('unhandledrejection', function(e) {
+                if (e.reason && e.reason.message && (
+                    e.reason.message.includes('PerformanceServerTiming') ||
+                    e.reason.message.includes('DataCloneError')
+                )) {
+                    e.stopImmediatePropagation();
+                    e.preventDefault();
+                    return false;
+                }
+            }, true);
+        </script>
         <noscript>You need to enable JavaScript to run this app.</noscript>
         <div id="root"></div>
         <!--
