@@ -23,6 +23,7 @@ Build a unique AI assistant named "BdAsk.com" for Bangladesh with primary focus 
 - Smart conversation with context awareness
 - Session management (create, delete, history)
 - Voice input with Bengali speech recognition
+- Directs users to appropriate feature tabs for live data
 
 #### 2. Premium Glassmorphism UI
 - Ocean Blue & Teal color scheme
@@ -31,178 +32,85 @@ Build a unique AI assistant named "BdAsk.com" for Bangladesh with primary focus 
 - Bengali font stack (Kalpurush, SolaimanLipi, Noto Sans Bengali)
 - Custom logo and favicon
 
-#### 3. Live Cricket Scores (🏏)
-- BPL matches
-- International matches (ODI, T20)
-- Live status indicators
-- Bengali team names and scores
-- **Note: MOCKED data - ready for API integration**
+#### 3. Live Cricket Scores (🏏) - ✅ REAL API
+- **API:** CricketData.org (cricapi.com)
+- Live T20, ODI, Test matches
+- ICC tournaments, BPL, IPL, World Cup
+- Real-time score updates
+- Bengali team name translations
 
 #### 4. Live Football Scores (⚽)
-- Premier League
-- La Liga
-- Champions League
+- Premier League, La Liga, Champions League
 - Live match minutes
 - **Note: MOCKED data - ready for API integration**
 
-#### 5. Breaking News (📰)
+#### 5. Breaking News (📰) - ✅ REAL API
+- **API:** NewsData.io
+- Real Bangladesh news in Bengali
+- Sources: Kaler Kantho, Prothom Alo, etc.
 - Category filters (জাতীয়, আন্তর্জাতিক, অর্থনীতি, খেলা, প্রযুক্তি, বিনোদন)
-- Bengali news sources
-- Time-based updates
-- **Note: MOCKED data - ready for API integration**
+- Relative time display in Bengali
 
-#### 6. Multi-language Translation (🌐)
-- 11 languages supported (Bengali, English, Hindi, Urdu, Arabic, Spanish, French, German, Chinese, Japanese, Korean)
+#### 6. Multi-language Translation (🌐) - ✅ WORKING
+- 11 languages supported
 - AI-powered translation via Gemini
 - Swap languages feature
 - Copy to clipboard
 
 #### 7. Currency Exchange (💱)
 - BDT as base currency
-- 8 major currencies (USD, EUR, GBP, INR, SAR, AED, MYR, SGD)
-- Currency converter
+- 8 major currencies
 - **Note: MOCKED rates - ready for API integration**
 
-#### 8. Prayer Times (🕌)
-- All 6 prayer times (Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha)
+#### 8. Prayer Times (🕌) - ✅ REAL API
+- **API:** Aladhan.com (FREE, no key needed)
+- All 6 prayer times
 - 8 Bangladesh cities
 - Hijri date display
-- Next prayer highlighting
-- Uses Aladhan API (FREE)
 
-#### 9. Weather Widget
-- OpenMeteo API integration (FREE)
+#### 9. Weather Widget - ✅ REAL API
+- **API:** OpenMeteo (FREE, no key needed)
 - Bangladesh cities support
 - Bengali weather descriptions
-- Appears in chat for weather queries
+
+---
+
+## API Keys Configured
+
+| Service | Key Location | Status |
+|---------|--------------|--------|
+| Cricket | CRICKET_API_KEY in backend/.env | ✅ Active |
+| News | NEWS_API_KEY in backend/.env | ✅ Active |
+| Prayer | No key needed (Aladhan) | ✅ Working |
+| Weather | No key needed (OpenMeteo) | ✅ Working |
+| AI Chat | EMERGENT_LLM_KEY | ✅ Working |
 
 ---
 
 ## Technical Architecture
 
-### Frontend
-- React 18 with hooks
-- TailwindCSS with custom design tokens
-- Framer Motion for animations
-- Shadcn/UI components
-- Axios for API calls
-
-### Backend
-- Python FastAPI
-- MongoDB database
-- Emergent Integrations for AI
-
-### File Structure
-```
-/app
-├── backend/
-│   ├── server.py          # FastAPI server
-│   └── requirements.txt
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── chat/      # Chat components
-│   │   │   ├── features/  # Feature tabs
-│   │   │   └── ui/        # Shadcn components
-│   │   ├── services/      # API services
-│   │   │   ├── weatherService.js
-│   │   │   ├── cricketService.js
-│   │   │   ├── footballService.js
-│   │   │   ├── newsService.js
-│   │   │   ├── translationService.js
-│   │   │   ├── exchangeService.js
-│   │   │   └── prayerService.js
-│   │   └── pages/
-│   │       └── ChatPage.jsx
-```
-
 ### API Endpoints
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| /api/ | GET | Welcome message |
-| /api/status | GET/POST | Health check |
-| /api/chat/session | POST | Create session |
-| /api/chat/sessions | GET | List sessions |
-| /api/chat/send | POST | Send message |
-| /api/chat/messages/{id} | GET | Get messages |
-| /api/chat/session/{id} | DELETE | Delete session |
-| /api/translate | POST | Translate text |
-
----
-
-## What's MOCKED (Ready for Real API Integration)
-
-1. **Cricket Scores** - Replace demo data in `cricketService.js` with CricketData.org or Sportmonks API
-2. **Football Scores** - Replace demo data in `footballService.js` with Football-Data.org API
-3. **News Articles** - Replace demo data in `newsService.js` with NewsData.io API
-4. **Exchange Rates** - Replace demo data in `exchangeService.js` with ExchangeRate-API
-
-See `/tmp/bdask-complete/bdask-ai-complete/API_INTEGRATION.md` for detailed integration guides.
-
----
-
-## Upcoming Features (Backlog)
-
-### P1 - High Priority
-- [ ] Real API integration for sports scores
-- [ ] Real API integration for news
-- [ ] Real API integration for exchange rates
-- [ ] PWA support with offline caching
-
-### P2 - Medium Priority
-- [ ] Low bandwidth mode toggle
-- [ ] bKash/Nagad payment UI stubs
-- [ ] Push notifications for prayer times
-
-### P3 - Future Enhancements
-- [ ] Image input for AI chat
-- [ ] Voice output (TTS)
-- [ ] User accounts and personalization
-- [ ] Favorite teams/news categories
-
----
-
-## Testing Status
-
-| Feature | Status | Test Coverage |
-|---------|--------|---------------|
-| Chat AI | ✅ PASSED | API + UI |
-| Weather | ✅ PASSED | API + Widget |
-| Translation | ✅ PASSED | API + UI |
-| Prayer Times | ✅ PASSED | API + UI |
-| Sports Tab | ✅ PASSED | UI (MOCKED) |
-| News Tab | ✅ PASSED | UI (MOCKED) |
-| Exchange Tab | ✅ PASSED | UI (MOCKED) |
-| Mobile View | ✅ PASSED | Responsive |
-| Dark Mode | ✅ PASSED | Theme toggle |
-
----
-
-## Known Issues
-
-1. **PostHog Analytics Error** - Third-party script error (suppressed, not affecting app)
-2. **Minor ESLint Warnings** - React Hook dependencies in SuggestionChips.jsx, PrayerTab.jsx
+| /api/cricket/live | GET | Live cricket scores |
+| /api/news | GET | Bangladesh news |
+| /api/news?category=X | GET | Filtered news |
+| /api/translate | POST | AI translation |
+| /api/chat/* | Various | Chat operations |
 
 ---
 
 ## Changelog
 
-### 2026-02-02
-- ✅ Integrated comprehensive feature set from user-provided zip file
-- ✅ Added Sports tab (Cricket + Football scores)
-- ✅ Added News tab with category filters
-- ✅ Added Translation tab (11 languages)
-- ✅ Added Currency Exchange tab
-- ✅ Added Prayer Times tab
-- ✅ Added bottom navigation for mobile
-- ✅ Added feature navigation to sidebar
-- ✅ Created all service files for feature data
-- ✅ Added /api/translate endpoint
-- ✅ All tests passing
+### 2026-02-02 (Latest)
+- ✅ Integrated CricketData.org API for LIVE cricket scores
+- ✅ Integrated NewsData.io API for REAL Bangladesh news
+- ✅ Fixed AI giving outdated sports info (now directs to tabs)
+- ✅ Added Bengali team name translations
+- ✅ Added relative time formatting in Bengali
 
 ### Previous
 - Premium Glassmorphism UI
+- All feature tabs (Sports, News, Translate, Exchange, Prayer)
+- Mobile bottom navigation
 - Gemini 3 Flash AI integration
-- Voice input with Bengali speech
-- Weather widget
-- Custom branding (logo, favicon)
