@@ -5,7 +5,11 @@ import {
   Lightbulb, 
   Heart,
   CloudSun,
-  MessageCircle
+  MessageCircle,
+  Trophy,
+  Globe2,
+  DollarSign,
+  Clock
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 
@@ -18,15 +22,15 @@ const STARTER_CARDS = [
     titleEn: "News",
     description: "আজকের গুরুত্বপূর্ণ খবর জানুন",
     prompt: "আজকের খবর কি?",
-    gradient: "from-purple-500 to-pink-500"
+    gradient: "from-pink-500 to-rose-500"
   },
   {
-    id: "creative",
-    icon: BookOpen,
-    title: "সৃজনশীল",
-    titleEn: "Creative",
-    description: "গল্প, কবিতা বা লেখালেখি",
-    prompt: "একটি সুন্দর গল্প লিখুন",
+    id: "sports",
+    icon: Trophy,
+    title: "খেলা",
+    titleEn: "Sports",
+    description: "ক্রিকেট ও ফুটবল স্কোর",
+    prompt: "আজকের ক্রিকেট স্কোর কি?",
     gradient: "from-orange-500 to-amber-500"
   },
   {
@@ -39,14 +43,22 @@ const STARTER_CARDS = [
     gradient: "from-blue-500 to-cyan-500"
   },
   {
-    id: "learn",
-    icon: Lightbulb,
-    title: "শিখুন",
-    titleEn: "Learn",
-    description: "নতুন কিছু জানতে চান?",
-    prompt: "নতুন কিছু শিখতে চাই",
-    gradient: "from-emerald-500 to-teal-500"
+    id: "translate",
+    icon: Globe2,
+    title: "অনুবাদ",
+    titleEn: "Translate",
+    description: "বহুভাষিক অনুবাদ করুন",
+    prompt: "Hello কে বাংলায় অনুবাদ করুন",
+    gradient: "from-violet-500 to-purple-500"
   }
+];
+
+// Quick Action Chips
+const QUICK_ACTIONS = [
+  { text: "কথা বলতে চাই", icon: MessageCircle },
+  { text: "অনুপ্রাণিত করুন", icon: Heart },
+  { text: "নতুন কিছু শিখতে চাই", icon: Lightbulb },
+  { text: "একটি গল্প বলুন", icon: BookOpen },
 ];
 
 /**
@@ -68,6 +80,7 @@ const StarterCard = ({ card, onClick, index }) => {
       whileTap={{ scale: 0.98 }}
       onClick={() => onClick(card.prompt)}
       className="starter-card"
+      data-testid={`starter-card-${card.id}`}
     >
       {/* Icon Container */}
       <div className={`starter-card-icon bg-gradient-to-br ${card.gradient}`}>
@@ -88,15 +101,56 @@ const StarterCard = ({ card, onClick, index }) => {
 };
 
 /**
+ * Feature Quick Access Component
+ */
+const FeatureQuickAccess = () => {
+  const features = [
+    { icon: Trophy, label: "স্কোর", color: "text-orange-500" },
+    { icon: DollarSign, label: "মুদ্রা", color: "text-emerald-500" },
+    { icon: Clock, label: "নামাজ", color: "text-green-500" },
+    { icon: Globe2, label: "অনুবাদ", color: "text-purple-500" },
+  ];
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.6 }}
+      className="flex justify-center gap-6 mb-6"
+    >
+      {features.map((feature, index) => {
+        const Icon = feature.icon;
+        return (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.7 + index * 0.1 }}
+            className="flex flex-col items-center"
+          >
+            <div className={`w-10 h-10 rounded-xl glass-panel flex items-center justify-center mb-1 ${feature.color}`}>
+              <Icon className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] text-muted-foreground bangla-body">
+              {feature.label}
+            </span>
+          </motion.div>
+        );
+      })}
+    </motion.div>
+  );
+};
+
+/**
  * Premium Welcome Screen Component
  * Displays when no chat session is active
  */
 export const WelcomeScreen = ({ onSuggestionClick }) => {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-6 overflow-y-auto">
+    <div className="flex-1 flex flex-col items-center justify-center p-6 overflow-y-auto" data-testid="welcome-screen">
       <div className="max-w-2xl w-full mx-auto text-center">
         {/* Premium Logo with Animation */}
-        <div className="mb-8">
+        <div className="mb-6">
           <Logo size="xl" showText={false} animate={true} className="justify-center" />
         </div>
         
@@ -112,24 +166,27 @@ export const WelcomeScreen = ({ onSuggestionClick }) => {
           <p className="text-lg text-muted-foreground bangla-body mb-2">
             আমি আপনার বাংলাদেশী AI সহকারী
           </p>
-          <p className="text-sm text-muted-foreground/80 bangla-body mb-10">
+          <p className="text-sm text-muted-foreground/80 bangla-body mb-8">
             বাংলা বা ইংরেজিতে যেকোনো প্রশ্ন করুন • 
             <span className="text-primary font-medium"> মাইক বাটনে ক্লিক করে কথাও বলতে পারেন!</span>
           </p>
         </motion.div>
+        
+        {/* Feature Quick Access */}
+        <FeatureQuickAccess />
         
         {/* Starter Cards Grid */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="mb-8"
+          className="mb-6"
         >
-          <p className="text-sm text-muted-foreground mb-5 bangla-body">
+          <p className="text-sm text-muted-foreground mb-4 bangla-body">
             শুরু করতে একটি বিষয় বেছে নিন:
           </p>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {STARTER_CARDS.map((card, index) => (
               <StarterCard
                 key={card.id}
@@ -145,19 +202,17 @@ export const WelcomeScreen = ({ onSuggestionClick }) => {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
+          transition={{ delay: 0.8 }}
           className="flex flex-wrap justify-center gap-2"
         >
-          {[
-            { text: "কথা বলতে চাই", icon: MessageCircle },
-            { text: "অনুপ্রাণিত করুন", icon: Heart },
-          ].map((item, index) => (
+          {QUICK_ACTIONS.map((item, index) => (
             <motion.button
               key={index}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               onClick={() => onSuggestionClick(item.text)}
               className="suggestion-chip"
+              data-testid={`quick-action-${index}`}
             >
               <item.icon className="w-4 h-4 text-primary" />
               <span className="bangla-body">{item.text}</span>
