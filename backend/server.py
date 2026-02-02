@@ -238,6 +238,48 @@ async def delete_chat_session(session_id: str):
     logger.info(f"Deleted chat session: {session_id}")
     return {"message": "সেশন মুছে ফেলা হয়েছে"}
 
+@api_router.post("/translate", response_model=TranslationResponse)
+async def translate_text(request: TranslationRequest):
+    """Translate text using Gemini LLM"""
+    try:
+        api_key = os.environ.get('EMERGENT_LLM_KEY')
+        if not api_key:
+            raise ValueError("EMERGENT_LLM_KEY not found")
+        
+        # Use Gemini for translation
+        chat = LlmChat(
+            api_key=api_key,
+            session_id=f"translate_{uuid.uuid4()}",
+            system_message="You are a professional translator. Translate the given text accurately while preserving meaning, tone, and cultural nuances. Only respond with the translated text, nothing else."
+        ).with_model("gemini", "gemini-3-flash-preview")
+        
+        # Language names for prompt
+        lang_names = {
+            'bn': 'Bengali', 'en': 'English', 'hi': 'Hindi', 'ur': 'Urdu',
+            'ar': 'Arabic', 'es': 'Spanish', 'fr': 'French', 'de': 'German',
+            'zh': 'Chinese', 'ja': 'Japanese', 'ko': 'Korean'
+        }
+        
+        source_name = lang_names.get(request.source, request.source)
+        target_name = lang_names.get(request.target, request.target)
+        
+        prompt = f"Translate the following text from {source_name} to {target_name}:\n\n{request.text}"
+        
+        user_message = UserMessage(text=prompt)
+        translated = await chat.send_message(user_message)
+        
+        logger.info(f"Translation completed: {request.source} -> {request.target}")
+        
+        return TranslationResponse(
+            translated_text=translated.strip(),
+            source=request.source,
+            target=request.target
+        )
+        
+    except Exception as e:
+        logger.error(f"Translation error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"অনুবাদে সমস্যা হয়েছে: {str(e)}")
+
 # Include the router in the main app
 app.include_router(api_router)
 
