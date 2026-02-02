@@ -63,6 +63,7 @@ export const PrayerTab = () => {
   
   useEffect(() => {
     loadPrayerTimes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCity]);
   
   return (
