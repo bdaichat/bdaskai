@@ -294,6 +294,126 @@ async def translate_text(request: TranslationRequest):
         logger.error(f"Translation error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"অনুবাদে সমস্যা হয়েছে: {str(e)}")
 
+# Cricket API endpoint
+@api_router.get("/cricket/live")
+async def get_live_cricket():
+    """Get live cricket scores from CricketData.org"""
+    import httpx
+    
+    cricket_api_key = os.environ.get('CRICKET_API_KEY')
+    if not cricket_api_key:
+        raise HTTPException(status_code=500, detail="Cricket API key not configured")
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            # Get current matches
+            response = await client.get(
+                f"https://api.cricapi.com/v1/currentMatches?apikey={cricket_api_key}&offset=0",
+                timeout=10.0
+            )
+            data = response.json()
+            
+            if data.get('status') != 'success':
+                logger.warning(f"Cricket API returned: {data}")
+                return {"matches": [], "message": "No live matches found"}
+            
+            matches = []
+            for match in data.get('data', [])[:10]:  # Limit to 10 matches
+                # Check if match has required fields
+                if not match.get('name'):
+                    continue
+                    
+                match_info = {
+                    "id": match.get('id', ''),
+                    "name": match.get('name', ''),
+                    "status": match.get('status', 'Unknown'),
+                    "venue": match.get('venue', ''),
+                    "date": match.get('date', ''),
+                    "matchType": match.get('matchType', ''),
+                    "teams": match.get('teams', []),
+                    "score": match.get('score', []),
+                    "series_id": match.get('series_id', ''),
+                    "fantasyEnabled": match.get('fantasyEnabled', False),
+                    "bbbEnabled": match.get('bbbEnabled', False),
+                    "hasSquad": match.get('hasSquad', False),
+                    "matchStarted": match.get('matchStarted', False),
+                    "matchEnded": match.get('matchEnded', False)
+                }
+                matches.append(match_info)
+            
+            logger.info(f"Cricket API returned {len(matches)} matches")
+            return {"matches": matches, "total": len(matches)}
+            
+    except httpx.TimeoutException:
+        logger.error("Cricket API timeout")
+        raise HTTPException(status_code=504, detail="Cricket API timeout")
+    except Exception as e:
+        logger.error(f"Cricket API error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Cricket API error: {str(e)}")
+
+# News API endpoint
+@api_router.get("/news")
+async def get_news(category: str = None):
+    """Get Bangladesh news from NewsData.io"""
+    import httpx
+    
+    news_api_key = os.environ.get('NEWS_API_KEY')
+    if not news_api_key:
+        raise HTTPException(status_code=500, detail="News API key not configured")
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            # Build URL with parameters
+            url = f"https://newsdata.io/api/1/news?apikey={news_api_key}&country=bd&language=bn"
+            
+            # Add category filter if provided
+            if category and category != 'all':
+                category_map = {
+                    'national': 'politics',
+                    'international': 'world',
+                    'economy': 'business',
+                    'sports': 'sports',
+                    'technology': 'technology',
+                    'entertainment': 'entertainment'
+                }
+                mapped_category = category_map.get(category.lower(), category)
+                url += f"&category={mapped_category}"
+            
+            response = await client.get(url, timeout=10.0)
+            data = response.json()
+            
+            if data.get('status') != 'success':
+                logger.warning(f"News API returned: {data}")
+                return {"articles": [], "message": "No news found"}
+            
+            articles = []
+            for article in data.get('results', [])[:15]:  # Limit to 15 articles
+                article_info = {
+                    "id": article.get('article_id', ''),
+                    "title": article.get('title', ''),
+                    "description": article.get('description', ''),
+                    "content": article.get('content', ''),
+                    "source": article.get('source_id', 'Unknown'),
+                    "sourceUrl": article.get('source_url', ''),
+                    "link": article.get('link', ''),
+                    "image": article.get('image_url'),
+                    "pubDate": article.get('pubDate', ''),
+                    "category": article.get('category', ['general'])[0] if article.get('category') else 'general',
+                    "country": article.get('country', ['bd']),
+                    "language": article.get('language', 'bn')
+                }
+                articles.append(article_info)
+            
+            logger.info(f"News API returned {len(articles)} articles")
+            return {"articles": articles, "total": len(articles)}
+            
+    except httpx.TimeoutException:
+        logger.error("News API timeout")
+        raise HTTPException(status_code=504, detail="News API timeout")
+    except Exception as e:
+        logger.error(f"News API error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"News API error: {str(e)}")
+
 # Include the router in the main app
 app.include_router(api_router)
 
