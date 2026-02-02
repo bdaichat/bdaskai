@@ -72,6 +72,16 @@ class ChatSession(BaseModel):
 class NewSessionRequest(BaseModel):
     title: Optional[str] = "নতুন কথোপকথন"
 
+class TranslationRequest(BaseModel):
+    text: str
+    source: str  # Source language code (e.g., 'bn', 'en')
+    target: str  # Target language code
+
+class TranslationResponse(BaseModel):
+    translated_text: str
+    source: str
+    target: str
+
 # System message for Bengali AI Assistant
 SYSTEM_MESSAGE = """আপনি বিডিআস্ক (BdAsk), বাংলাদেশের জন্য একটি উন্নত AI সহকারী। আপনি বাংলা এবং ইংরেজি উভয় ভাষায় সাহায্য করতে পারেন।
 
