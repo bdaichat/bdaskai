@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
-import { Menu, Moon, Sun } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Menu, Moon, Sun, Home, MessageCircle, Newspaper, 
+  Trophy, Globe2, DollarSign, Clock 
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import axios from "axios";
@@ -16,12 +19,20 @@ import {
 import { Logo } from "@/components/Logo";
 import { fetchWeather, isWeatherQuery } from "@/services/weatherService";
 
+// Import feature tabs
+import { 
+  SportsTab, 
+  NewsTab, 
+  TranslateTab, 
+  ExchangeTab, 
+  PrayerTab 
+} from "@/components/features";
+
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
 /**
  * Premium Ocean Atmosphere Background
- * Creates the premium floating effect with animated gradient blobs
  */
 const OceanAtmosphere = () => (
   <div className="ocean-atmosphere">
@@ -32,7 +43,149 @@ const OceanAtmosphere = () => (
 );
 
 /**
- * Main Chat Page Component - Premium Version
+ * Navigation Tab Items
+ */
+const NAV_TABS = [
+  { id: 'home', icon: Home, label: 'হোম' },
+  { id: 'chat', icon: MessageCircle, label: 'চ্যাট' },
+  { id: 'news', icon: Newspaper, label: 'খবর' },
+  { id: 'sports', icon: Trophy, label: 'খেলা' },
+  { id: 'translate', icon: Globe2, label: 'অনুবাদ' },
+  { id: 'exchange', icon: DollarSign, label: 'মুদ্রা' },
+  { id: 'prayer', icon: Clock, label: 'নামাজ' },
+];
+
+/**
+ * Bottom Navigation Bar Component
+ */
+const BottomNavBar = ({ activeTab, onTabChange }) => (
+  <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden glass-card rounded-t-2xl border-t border-border/30 safe-area-bottom">
+    <div className="flex justify-around items-center py-2 px-1">
+      {NAV_TABS.slice(0, 5).map((tab) => {
+        const Icon = tab.icon;
+        const isActive = activeTab === tab.id;
+        
+        return (
+          <button
+            key={tab.id}
+            onClick={() => onTabChange(tab.id)}
+            className={`flex flex-col items-center justify-center py-2 px-3 rounded-xl transition-all touch-target ${
+              isActive 
+                ? 'text-primary bg-primary/10' 
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+            data-testid={`nav-${tab.id}`}
+          >
+            <Icon className={`w-5 h-5 ${isActive ? 'scale-110' : ''} transition-transform`} />
+            <span className={`text-[10px] mt-1 bangla-body ${isActive ? 'font-medium' : ''}`}>
+              {tab.label}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  </nav>
+);
+
+/**
+ * Enhanced Sidebar Navigation for Desktop
+ */
+const DesktopSidebar = ({ 
+  sessions, 
+  currentSessionId, 
+  onSelectSession, 
+  onNewSession, 
+  onDeleteSession,
+  activeTab,
+  onTabChange,
+  isOpen,
+  onClose 
+}) => {
+  return (
+    <>
+      {/* Backdrop overlay for mobile */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-foreground/30 backdrop-blur-sm z-40 lg:hidden"
+            onClick={onClose}
+          />
+        )}
+      </AnimatePresence>
+      
+      {/* Sidebar Panel */}
+      <motion.aside
+        initial={false}
+        className={`fixed lg:static inset-y-0 left-0 z-50 w-72 glass-card rounded-none lg:rounded-2xl lg:m-4 lg:h-[calc(100vh-2rem)]
+                    flex flex-col shadow-glass-strong ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}
+        style={{ transition: 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)' }}
+      >
+        {/* Header */}
+        <div className="p-4 border-b border-border/30">
+          <Logo size="md" showText={true} animate={false} />
+        </div>
+        
+        {/* Feature Navigation */}
+        <div className="p-3 border-b border-border/30">
+          <p className="text-xs text-muted-foreground mb-2 px-2 bangla-body">ফিচার</p>
+          <div className="space-y-1">
+            {NAV_TABS.map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    onTabChange(tab.id);
+                    onClose();
+                  }}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${
+                    isActive 
+                      ? 'bg-primary/15 text-primary border border-primary/30' 
+                      : 'hover:bg-card/60 text-foreground'
+                  }`}
+                  data-testid={`sidebar-nav-${tab.id}`}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="text-sm bangla-body">{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+        
+        {/* Chat Sessions (Only show when chat is active) */}
+        {activeTab === 'chat' && (
+          <Sidebar
+            sessions={sessions}
+            currentSessionId={currentSessionId}
+            onSelectSession={onSelectSession}
+            onNewSession={onNewSession}
+            onDeleteSession={onDeleteSession}
+            isOpen={true}
+            onClose={() => {}}
+          />
+        )}
+        
+        {/* Footer */}
+        <div className="mt-auto p-4 border-t border-border/30">
+          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+            <span className="bangla-body">বাংলাদেশের জন্য তৈরি</span>
+            <span className="text-red-500">❤️</span>
+          </div>
+        </div>
+      </motion.aside>
+    </>
+  );
+};
+
+/**
+ * Main Chat Page Component - Premium Version with Full Features
  */
 export default function ChatPage() {
   const [sessions, setSessions] = useState([]);
@@ -41,6 +194,7 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [activeTab, setActiveTab] = useState('home');
   
   // Get last message for smart suggestions
   const lastMessage = messages.length > 0 
@@ -95,6 +249,7 @@ export default function ChatPage() {
       setCurrentSessionId(response.data.id);
       setMessages([]);
       setIsSidebarOpen(false);
+      setActiveTab('chat');
       toast.success("নতুন কথোপকথন শুরু হয়েছে!", {
         icon: "✨",
         duration: 2000
@@ -125,6 +280,11 @@ export default function ChatPage() {
   
   const sendMessage = async (content) => {
     if (!content.trim()) return;
+    
+    // Switch to chat tab if not already there
+    if (activeTab !== 'chat') {
+      setActiveTab('chat');
+    }
     
     // Create session if not exists
     let sessionId = currentSessionId;
@@ -193,28 +353,61 @@ export default function ChatPage() {
   const handleSuggestionClick = (text) => {
     sendMessage(text);
   };
+
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+  };
+  
+  // Get current tab title
+  const getCurrentTabTitle = () => {
+    if (activeTab === 'chat' && currentSessionId) {
+      return sessions.find(s => s.id === currentSessionId)?.title || 'কথোপকথন';
+    }
+    return NAV_TABS.find(t => t.id === activeTab)?.label || 'বিডিআস্ক AI';
+  };
   
   return (
     <div className="h-screen flex overflow-hidden relative bg-background">
       {/* Premium Ocean Atmosphere Background */}
       <OceanAtmosphere />
       
-      {/* Sidebar */}
-      <Sidebar
-        sessions={sessions}
-        currentSessionId={currentSessionId}
-        onSelectSession={(id) => {
-          setCurrentSessionId(id);
-          setIsSidebarOpen(false);
-        }}
-        onNewSession={createNewSession}
-        onDeleteSession={deleteSession}
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-      />
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:block">
+        <DesktopSidebar
+          sessions={sessions}
+          currentSessionId={currentSessionId}
+          onSelectSession={(id) => {
+            setCurrentSessionId(id);
+            setActiveTab('chat');
+          }}
+          onNewSession={createNewSession}
+          onDeleteSession={deleteSession}
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+        />
+      </div>
       
-      {/* Main chat area */}
-      <div className="flex-1 flex flex-col min-w-0 relative z-10">
+      {/* Mobile Sidebar */}
+      <div className="lg:hidden">
+        <Sidebar
+          sessions={sessions}
+          currentSessionId={currentSessionId}
+          onSelectSession={(id) => {
+            setCurrentSessionId(id);
+            setActiveTab('chat');
+            setIsSidebarOpen(false);
+          }}
+          onNewSession={createNewSession}
+          onDeleteSession={deleteSession}
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+        />
+      </div>
+      
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 relative z-10 pb-16 lg:pb-0">
         {/* Premium Header */}
         <header className="flex items-center justify-between px-4 py-3 glass-card rounded-none lg:rounded-b-2xl border-b border-border/30 lg:mx-4 lg:mt-4 relative z-20">
           <div className="flex items-center gap-3">
@@ -225,6 +418,7 @@ export default function ChatPage() {
               onClick={() => setIsSidebarOpen(true)}
               className="lg:hidden rounded-xl hover:bg-card/80 touch-target"
               aria-label="Open menu"
+              data-testid="mobile-menu-btn"
             >
               <Menu className="w-5 h-5" />
             </Button>
@@ -237,10 +431,7 @@ export default function ChatPage() {
               
               <div>
                 <h1 className="font-semibold text-foreground bangla-heading text-sm lg:text-base">
-                  {currentSessionId 
-                    ? sessions.find(s => s.id === currentSessionId)?.title || 'কথোপকথন'
-                    : 'বিডিআস্ক AI'
-                  }
+                  {getCurrentTabTitle()}
                 </h1>
                 <p className="text-xs text-muted-foreground hidden lg:block">
                   Premium • Gemini 3 Flash দ্বারা চালিত
@@ -255,6 +446,7 @@ export default function ChatPage() {
             whileTap={{ scale: 0.95 }}
             onClick={toggleDarkMode}
             className="w-10 h-10 rounded-xl glass-panel flex items-center justify-center hover:bg-card/80 transition-colors touch-target"
+            data-testid="theme-toggle-btn"
           >
             {isDarkMode ? (
               <Sun className="w-5 h-5 text-amber-500" />
@@ -264,33 +456,127 @@ export default function ChatPage() {
           </motion.button>
         </header>
         
-        {/* Messages area */}
+        {/* Tab Content */}
         <div className="flex-1 overflow-hidden">
-          {messages.length === 0 && !currentSessionId ? (
-            <WelcomeScreen onSuggestionClick={handleSuggestionClick} />
-          ) : (
-            <ChatWindow messages={messages} isLoading={isLoading} />
-          )}
+          <AnimatePresence mode="wait">
+            {/* Home Tab */}
+            {activeTab === 'home' && (
+              <motion.div
+                key="home"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="h-full"
+              >
+                <WelcomeScreen onSuggestionClick={handleSuggestionClick} />
+              </motion.div>
+            )}
+            
+            {/* Chat Tab */}
+            {activeTab === 'chat' && (
+              <motion.div
+                key="chat"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="h-full flex flex-col"
+              >
+                {messages.length === 0 && !currentSessionId ? (
+                  <WelcomeScreen onSuggestionClick={handleSuggestionClick} />
+                ) : (
+                  <ChatWindow messages={messages} isLoading={isLoading} />
+                )}
+                
+                {/* Smart suggestions (when in conversation) */}
+                {currentSessionId && messages.length > 0 && !isLoading && (
+                  <div className="px-4 lg:px-6 pb-2">
+                    <SuggestionChips 
+                      onSuggestionClick={handleSuggestionClick}
+                      lastMessage={lastMessage}
+                      isLoading={isLoading}
+                    />
+                  </div>
+                )}
+                
+                {/* Chat Input */}
+                <ChatInput
+                  onSendMessage={sendMessage}
+                  isLoading={isLoading}
+                  placeholder="আপনার বার্তা লিখুন বা কথা বলুন..."
+                />
+              </motion.div>
+            )}
+            
+            {/* News Tab */}
+            {activeTab === 'news' && (
+              <motion.div
+                key="news"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="h-full"
+              >
+                <NewsTab />
+              </motion.div>
+            )}
+            
+            {/* Sports Tab */}
+            {activeTab === 'sports' && (
+              <motion.div
+                key="sports"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="h-full"
+              >
+                <SportsTab />
+              </motion.div>
+            )}
+            
+            {/* Translate Tab */}
+            {activeTab === 'translate' && (
+              <motion.div
+                key="translate"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="h-full"
+              >
+                <TranslateTab />
+              </motion.div>
+            )}
+            
+            {/* Exchange Tab */}
+            {activeTab === 'exchange' && (
+              <motion.div
+                key="exchange"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="h-full"
+              >
+                <ExchangeTab />
+              </motion.div>
+            )}
+            
+            {/* Prayer Tab */}
+            {activeTab === 'prayer' && (
+              <motion.div
+                key="prayer"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="h-full"
+              >
+                <PrayerTab />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-        
-        {/* Smart suggestions (when in conversation) */}
-        {currentSessionId && messages.length > 0 && !isLoading && (
-          <div className="px-4 lg:px-6 pb-2">
-            <SuggestionChips 
-              onSuggestionClick={handleSuggestionClick}
-              lastMessage={lastMessage}
-              isLoading={isLoading}
-            />
-          </div>
-        )}
-        
-        {/* Premium Chat Input */}
-        <ChatInput
-          onSendMessage={sendMessage}
-          isLoading={isLoading}
-          placeholder="আপনার বার্তা লিখুন বা কথা বলুন..."
-        />
       </div>
+      
+      {/* Bottom Navigation Bar (Mobile Only) */}
+      <BottomNavBar activeTab={activeTab} onTabChange={handleTabChange} />
     </div>
   );
 }
