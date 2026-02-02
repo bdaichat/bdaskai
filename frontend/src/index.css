@@ -755,3 +755,52 @@
         gap: inherit;
     }
 }
+
+/* ==========================================
+   MOBILE SAFE AREA & BOTTOM NAV
+   ========================================== */
+@layer components {
+    .safe-area-bottom {
+        padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+    
+    /* Feature tab styles */
+    .feature-tab-container {
+        @apply h-full flex flex-col;
+    }
+    
+    /* Score card animations */
+    .score-live-pulse {
+        animation: live-pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes live-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+    
+    /* News card hover effect */
+    .news-card-hover {
+        transition: all var(--transition-smooth);
+    }
+    
+    .news-card-hover:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    /* Currency card gradient */
+    .currency-card {
+        background: linear-gradient(145deg, 
+            hsl(var(--card) / 0.95) 0%, 
+            hsl(var(--primary-light) / 0.3) 100%);
+    }
+    
+    /* Prayer time highlight */
+    .prayer-next {
+        background: linear-gradient(135deg,
+            hsl(var(--primary) / 0.15) 0%,
+            hsl(var(--accent) / 0.15) 100%);
+        border: 1px solid hsl(var(--primary) / 0.3);
+    }
+}
