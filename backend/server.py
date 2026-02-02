@@ -125,7 +125,7 @@ def get_or_create_chat(session_id: str) -> LlmChat:
         chat = LlmChat(
             api_key=api_key,
             session_id=session_id,
-            system_message=SYSTEM_MESSAGE
+            system_message=get_system_message()  # Use dynamic system message
         ).with_model("gemini", "gemini-3-flash-preview")
         
         chat_sessions[session_id] = chat
