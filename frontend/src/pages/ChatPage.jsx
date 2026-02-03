@@ -56,28 +56,32 @@ const NAV_TABS = [
 ];
 
 /**
- * Bottom Navigation Bar Component
+ * Floating Bottom Navigation Bar (Apple Style)
  */
 const BottomNavBar = ({ activeTab, onTabChange }) => (
-  <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden glass-card rounded-t-2xl border-t border-border/30 safe-area-bottom">
-    <div className="flex justify-around items-center py-2 px-1">
+  <nav className="floating-nav lg:hidden" data-testid="floating-nav">
+    <div className="flex justify-around items-center py-2 px-2">
       {NAV_TABS.slice(0, 5).map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;
         
         return (
-          <button
+          <motion.button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
-            className={`flex flex-col items-center justify-center py-2 px-3 rounded-xl transition-all touch-target ${
-              isActive 
-                ? 'text-primary bg-primary/10' 
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
+            whileTap={{ scale: 0.9 }}
+            className={`floating-nav-item ${isActive ? 'active' : ''}`}
             data-testid={`nav-${tab.id}`}
           >
-            <Icon className={`w-5 h-5 ${isActive ? 'scale-110' : ''} transition-transform`} />
-            <span className={`text-[10px] mt-1 bangla-body ${isActive ? 'font-medium' : ''}`}>
+            <Icon className={`w-5 h-5 transition-all duration-300 ${
+              isActive ? 'text-primary' : 'text-muted-foreground'
+            }`} strokeWidth={isActive ? 2.5 : 2} />
+            <span className={`text-[10px] mt-0.5 bangla-body transition-all duration-300 ${
+              isActive ? 'text-primary font-semibold' : 'text-muted-foreground'
+            }`}>
+              {tab.label}
+            </span>
+          </motion.button>
               {tab.label}
             </span>
           </button>
