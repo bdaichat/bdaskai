@@ -81,29 +81,33 @@ export const SportsTab = () => {
   return (
     <div className="h-full flex flex-col p-4 overflow-y-auto custom-scrollbar" data-testid="sports-tab">
       {/* Sub-tab Selector */}
-      <div className="flex gap-2 mb-4">
-        <button
+      <div className="flex gap-3 mb-5">
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => setActiveSubTab('cricket')}
-          className={`flex-1 py-3 rounded-xl font-medium transition-all bangla-body ${
+          className={`flex-1 py-3.5 rounded-2xl font-medium transition-all bangla-body flex items-center justify-center gap-2 ${
             activeSubTab === 'cricket'
-              ? 'bg-primary text-primary-foreground shadow-md'
+              ? 'btn-primary'
               : 'glass-panel hover:bg-card/80'
           }`}
           data-testid="cricket-tab-btn"
         >
-          🏏 ক্রিকেট
-        </button>
-        <button
+          <span className="text-xl">🏏</span> ক্রিকেট
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => setActiveSubTab('football')}
-          className={`flex-1 py-3 rounded-xl font-medium transition-all bangla-body ${
+          className={`flex-1 py-3.5 rounded-2xl font-medium transition-all bangla-body flex items-center justify-center gap-2 ${
             activeSubTab === 'football'
-              ? 'bg-primary text-primary-foreground shadow-md'
+              ? 'btn-primary'
               : 'glass-panel hover:bg-card/80'
           }`}
           data-testid="football-tab-btn"
         >
-          ⚽ ফুটবল
-        </button>
+          <span className="text-xl">⚽</span> ফুটবল
+        </motion.button>
       </div>
       
       {/* Refresh Button */}
