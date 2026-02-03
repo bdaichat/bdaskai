@@ -1,0 +1,136 @@
+{
+  "design_system": {
+    "identity": {
+      "name": "BdAsk.com - Premium AI Assistant",
+      "aesthetic": "Deep Bioluminescent Ocean (Dark) / Glacial Porcelain (Light)",
+      "core_values": ["Futuristic", "Premium", "Clear", "Bengali-First"],
+      "visual_mood": "Glassmorphism 2.0 - High saturation, heavy blur, depth, vivid 3D accents"
+    },
+    "typography": {
+      "english_font": "Manrope",
+      "bengali_font": "Hind Siliguri",
+      "scale": {
+        "display": "text-4xl md:text-6xl font-bold tracking-tight",
+        "h1": "text-3xl md:text-4xl font-bold tracking-tight",
+        "h2": "text-2xl md:text-3xl font-semibold tracking-tight",
+        "h3": "text-xl md:text-2xl font-semibold",
+        "body_lg": "text-lg font-medium leading-relaxed",
+        "body": "text-base font-normal leading-relaxed",
+        "caption": "text-sm font-medium tracking-wide uppercase opacity-70"
+      },
+      "instructions": "Import 'Manrope' and 'Hind Siliguri' from Google Fonts. Use Manrope for numbers and English UI elements. Use Hind Siliguri for ALL Bengali text."
+    },
+    "colors": {
+      "palette": {
+        "primary": {
+          "base": "#06b6d4",
+          "hover": "#0891b2",
+          "foreground": "#ffffff",
+          "glow": "0 0 20px rgba(6, 182, 212, 0.5)"
+        },
+        "secondary": {
+          "base": "#3b82f6",
+          "hover": "#2563eb",
+          "foreground": "#ffffff"
+        },
+        "accent": {
+          "base": "#f43f5e",
+          "hover": "#e11d48",
+          "foreground": "#ffffff",
+          "usage": "Live badges, Alerts, 'Hot' news"
+        },
+        "background": {
+          "dark": "#0B1120",
+          "dark_elevated": "#151e32",
+          "light": "#f8fafc",
+          "light_elevated": "#ffffff"
+        },
+        "text": {
+          "dark": "#f1f5f9",
+          "dark_muted": "#94a3b8",
+          "light": "#0f172a",
+          "light_muted": "#64748b"
+        },
+        "glass": {
+          "dark": "rgba(15, 23, 42, 0.6)",
+          "dark_border": "rgba(255, 255, 255, 0.1)",
+          "light": "rgba(255, 255, 255, 0.7)",
+          "light_border": "rgba(255, 255, 255, 0.5)"
+        }
+      },
+      "gradients": {
+        "ocean_prime": "linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)",
+        "deep_sea": "linear-gradient(to bottom, #0f172a, #0B1120)",
+        "glass_shine": "linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.01) 100%)"
+      }
+    },
+    "visual_enhancers": {
+      "glassmorphism": {
+        "classes": "backdrop-blur-xl bg-background/60 border border-white/10 shadow-xl",
+        "instruction": "Apply to all cards, sticky headers, and bottom navigation."
+      },
+      "shadows": {
+        "neon": "0 0 15px rgba(6, 182, 212, 0.3), 0 4px 6px rgba(0,0,0,0.1)",
+        "floating": "0 10px 30px -10px rgba(0,0,0,0.5)"
+      },
+      "borders": {
+        "shimmer": "border border-transparent bg-gradient-to-r from-transparent via-white/20 to-transparent bg-[length:200%_100%] animate-shimmer"
+      },
+      "3d_icons": {
+        "concept": "Bubble Glass",
+        "implementation": "Wrap Lucide icons in a container with 'bg-gradient-to-br from-white/20 to-white/5 border border-white/20 rounded-2xl shadow-lg'. Add 'drop-shadow-md' to the icon SVG itself."
+      }
+    },
+    "layout_strategies": {
+      "mobile_nav": "Floating Glass Bar (Apple Style) - Detached from bottom by 16px, rounded-full, blurred.",
+      "dashboard_grid": "Bento Grid - Use varied span sizes. Hero widget (Weather/Greeting) spans full width.",
+      "chat_interface": "Bubbles must be distinct. User: Gradient Ocean. AI: Glass Dark/Light. Input area: Floating capsule.",
+      "spacing": "Relaxed. Use p-6 or p-8 inside cards. Gap-4 or Gap-6 between grid items."
+    },
+    "component_styling": {
+      "buttons": {
+        "primary": "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white shadow-lg shadow-cyan-500/25 rounded-xl font-semibold transition-all hover:scale-105 active:scale-95",
+        "glass": "bg-white/10 hover:bg-white/20 text-foreground border border-white/10 backdrop-blur-md rounded-xl transition-all"
+      },
+      "cards": {
+        "base": "bg-card/50 backdrop-blur-xl border border-border/50 rounded-2xl shadow-sm hover:shadow-md transition-all hover:bg-card/60",
+        "highlight": "bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border border-cyan-500/20"
+      },
+      "inputs": {
+        "search": "bg-background/50 border border-white/10 rounded-full py-3 px-6 focus:ring-2 focus:ring-cyan-500/50 transition-all backdrop-blur-sm"
+      }
+    },
+    "motion": {
+      "micro_interactions": {
+        "hover": "scale-105",
+        "tap": "scale-95",
+        "load": "animate-pulse"
+      },
+      "page_transitions": {
+        "enter": "initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: 'easeOut' }}"
+      },
+      "floating_elements": "animate-float (custom keyframe moving y axis +/- 5px)"
+    },
+    "instructions_to_main_agent": [
+      "1. UPDATE tailwind.config.js to include the new color palette and fonts.",
+      "2. UPDATE index.css to add the custom 'mesh' background utilities and @font-face imports.",
+      "3. CREATE a 'GlassCard' component in /components/ui/glass-card.jsx that implements the glassmorphism logic.",
+      "4. REFACTOR the Bottom Navigation to be a floating capsule instead of a fixed bottom bar.",
+      "5. REFACTOR the Home Screen to use a Bento Grid layout.",
+      "6. APPLY the '3d-icon-style' to all category icons.",
+      "7. ENSURE Dark Mode is the default or at least the 'premium' experience.",
+      "8. MAINTAIN Bengali text legibility by ensuring line-height is at least 1.6.",
+      "9. DO NOT remove existing functionality (Prayer times, Currency, etc.), just restyle them.",
+      "10. Use 'framer-motion' for smooth entrance animations on all cards."
+    ],
+    "universal_guidelines": [
+      "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients",
+      "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
+      "Create depth through layered design elements with z-index hierarchy",
+      "Use glass-morphism effects with backdrop filters (12-24px blur)",
+      "You MUST NOT apply universal transition. Eg: transition: all. This results in breaking transforms.",
+      "Every interaction needs micro-animations - hover states, transitions.",
+      "Use 2-3x more spacing than feels comfortable."
+    ]
+  }
+}
