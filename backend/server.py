@@ -414,6 +414,142 @@ async def get_news(category: str = None):
         logger.error(f"News API error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"News API error: {str(e)}")
 
+# Football API endpoint
+@api_router.get("/football/live")
+async def get_live_football():
+    """Get live football scores from Football-Data.org"""
+    import httpx
+    
+    football_api_key = os.environ.get('FOOTBALL_API_KEY')
+    if not football_api_key:
+        raise HTTPException(status_code=500, detail="Football API key not configured")
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            # Get today's matches from major leagues
+            headers = {"X-Auth-Token": football_api_key}
+            
+            # Get matches from multiple competitions
+            matches = []
+            
+            # Premier League (PL), La Liga (PD), Champions League (CL)
+            competitions = [
+                {"code": "PL", "name": "প্রিমিয়ার লিগ", "nameEn": "Premier League"},
+                {"code": "PD", "name": "লা লিগা", "nameEn": "La Liga"},
+                {"code": "CL", "name": "চ্যাম্পিয়ন্স লিগ", "nameEn": "Champions League"},
+                {"code": "BL1", "name": "বুন্দেসলিগা", "nameEn": "Bundesliga"},
+                {"code": "SA", "name": "সেরি আ", "nameEn": "Serie A"},
+            ]
+            
+            for comp in competitions:
+                try:
+                    response = await client.get(
+                        f"https://api.football-data.org/v4/competitions/{comp['code']}/matches?status=SCHEDULED,LIVE,IN_PLAY,PAUSED,FINISHED",
+                        headers=headers,
+                        timeout=10.0
+                    )
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        for match in data.get('matches', [])[:5]:  # Limit per competition
+                            home_team = match.get('homeTeam', {}).get('name', 'Home')
+                            away_team = match.get('awayTeam', {}).get('name', 'Away')
+                            home_score = match.get('score', {}).get('fullTime', {}).get('home')
+                            away_score = match.get('score', {}).get('fullTime', {}).get('away')
+                            status = match.get('status', 'SCHEDULED')
+                            
+                            # Map status to Bengali
+                            status_map = {
+                                'SCHEDULED': 'আসন্ন',
+                                'TIMED': 'আসন্ন',
+                                'LIVE': 'লাইভ',
+                                'IN_PLAY': 'লাইভ',
+                                'PAUSED': 'বিরতি',
+                                'FINISHED': 'সম্পন্ন',
+                                'POSTPONED': 'স্থগিত',
+                                'CANCELLED': 'বাতিল'
+                            }
+                            
+                            is_live = status in ['LIVE', 'IN_PLAY', 'PAUSED']
+                            
+                            match_info = {
+                                "id": match.get('id'),
+                                "teams": f"{home_team} vs {away_team}",
+                                "teamsEn": f"{home_team} vs {away_team}",
+                                "homeScore": home_score if home_score is not None else 0,
+                                "awayScore": away_score if away_score is not None else 0,
+                                "status": status_map.get(status, status),
+                                "statusEn": status,
+                                "league": comp['name'],
+                                "leagueEn": comp['nameEn'],
+                                "minute": match.get('minute'),
+                                "isLive": is_live,
+                                "utcDate": match.get('utcDate')
+                            }
+                            matches.append(match_info)
+                except Exception as e:
+                    logger.warning(f"Error fetching {comp['code']}: {e}")
+                    continue
+            
+            logger.info(f"Football API returned {len(matches)} matches")
+            return {"matches": matches[:20], "total": len(matches)}  # Limit to 20 total
+            
+    except httpx.TimeoutException:
+        logger.error("Football API timeout")
+        raise HTTPException(status_code=504, detail="Football API timeout")
+    except Exception as e:
+        logger.error(f"Football API error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Football API error: {str(e)}")
+
+# Exchange Rate API endpoint
+@api_router.get("/exchange/rates")
+async def get_exchange_rates():
+    """Get live exchange rates from ExchangeRate-API"""
+    import httpx
+    
+    exchange_api_key = os.environ.get('EXCHANGE_API_KEY')
+    if not exchange_api_key:
+        raise HTTPException(status_code=500, detail="Exchange API key not configured")
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            # Get rates with BDT as base
+            response = await client.get(
+                f"https://v6.exchangerate-api.com/v6/{exchange_api_key}/latest/BDT",
+                timeout=10.0
+            )
+            
+            data = response.json()
+            
+            if data.get('result') != 'success':
+                logger.warning(f"Exchange API returned: {data}")
+                raise HTTPException(status_code=500, detail="Exchange API error")
+            
+            # Get specific currencies we need
+            all_rates = data.get('conversion_rates', {})
+            
+            # Filter to relevant currencies
+            currency_list = ['USD', 'EUR', 'GBP', 'INR', 'SAR', 'AED', 'MYR', 'SGD', 'JPY', 'CNY', 'AUD', 'CAD']
+            
+            rates = {}
+            for curr in currency_list:
+                if curr in all_rates:
+                    rates[curr] = all_rates[curr]
+            
+            logger.info(f"Exchange API returned rates for {len(rates)} currencies")
+            return {
+                "base": "BDT",
+                "rates": rates,
+                "lastUpdated": data.get('time_last_update_utc', '')
+            }
+            
+    except httpx.TimeoutException:
+        logger.error("Exchange API timeout")
+        raise HTTPException(status_code=504, detail="Exchange API timeout")
+    except Exception as e:
+        logger.error(f"Exchange API error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Exchange API error: {str(e)}")
+
 # Include the router in the main app
 app.include_router(api_router)
 
