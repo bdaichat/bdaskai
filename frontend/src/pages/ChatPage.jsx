@@ -82,8 +82,6 @@ const BottomNavBar = ({ activeTab, onTabChange }) => (
               {tab.label}
             </span>
           </motion.button>
-            </span>
-          </motion.button>
         );
       })}
     </div>
