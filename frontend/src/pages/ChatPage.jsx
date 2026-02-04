@@ -577,6 +577,32 @@ export default function ChatPage() {
                 <PrayerTab />
               </motion.div>
             )}
+            
+            {/* Ramadan Tab */}
+            {activeTab === 'ramadan' && (
+              <motion.div
+                key="ramadan"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="h-full"
+              >
+                <RamadanTiming />
+              </motion.div>
+            )}
+            
+            {/* Zakat Tab */}
+            {activeTab === 'zakat' && (
+              <motion.div
+                key="zakat"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="h-full"
+              >
+                <ZakatCalculator />
+              </motion.div>
+            )}
           </AnimatePresence>
         </div>
       </div>
