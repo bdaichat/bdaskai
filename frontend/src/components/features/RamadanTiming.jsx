@@ -38,15 +38,12 @@ const RamadanTiming = () => {
     setIsRamadan(true);
   }, []);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentDate(new Date());
-      calculateTimeUntilIftar();
-    }, 60000);
-
-    calculateTimeUntilIftar();
-    return () => clearInterval(timer);
-  }, [selectedCity]);
+  const toBengaliNumber = (num) => {
+    const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
+    return num.toString().split('').map(digit => 
+      digit >= '0' && digit <= '9' ? bengaliDigits[parseInt(digit)] : digit
+    ).join('');
+  };
 
   const calculateTimeUntilIftar = () => {
     const now = new Date();
@@ -68,12 +65,16 @@ const RamadanTiming = () => {
     setTimeUntilIftar(`${toBengaliNumber(hours)} ঘন্টা ${toBengaliNumber(minutes)} মিনিট`);
   };
 
-  const toBengaliNumber = (num) => {
-    const bengaliDigits = ['০', '১', '২', '৩', '৪', '৫', '৬', '৭', '৮', '৯'];
-    return num.toString().split('').map(digit => 
-      digit >= '0' && digit <= '9' ? bengaliDigits[parseInt(digit)] : digit
-    ).join('');
-  };
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentDate(new Date());
+      calculateTimeUntilIftar();
+    }, 60000);
+
+    calculateTimeUntilIftar();
+    return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCity]);
 
   const formatTimeBengali = (time) => {
     const [hour, minute] = time.split(':');
