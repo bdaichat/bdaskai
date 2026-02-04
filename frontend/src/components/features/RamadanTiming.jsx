@@ -217,7 +217,7 @@ const RamadanTiming = () => {
         className="p-5 rounded-2xl bg-gradient-to-r from-cyan-400 to-emerald-400 text-white text-center"
       >
         <p className="text-base bangla-body mb-2 leading-relaxed">
-          "রমজান মাস, যে মাসে কুরআন নাযিল করা হয়েছে মানুষের হিদায়াতের জন্য"
+          &ldquo;রমজান মাস, যে মাসে কুরআন নাযিল করা হয়েছে মানুষের হিদায়াতের জন্য&rdquo;
         </p>
         <p className="text-sm opacity-80 italic">- সূরা আল-বাকারা (২:১৮৫)</p>
       </motion.div>
