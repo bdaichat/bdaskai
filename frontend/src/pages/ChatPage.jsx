@@ -63,35 +63,47 @@ const NAV_TABS = [
 /**
  * Floating Bottom Navigation Bar (Apple Style)
  */
-const BottomNavBar = ({ activeTab, onTabChange }) => (
-  <nav className="floating-nav lg:hidden" data-testid="floating-nav">
-    <div className="flex justify-around items-center py-2 px-2">
-      {NAV_TABS.slice(0, 5).map((tab) => {
-        const Icon = tab.icon;
-        const isActive = activeTab === tab.id;
-        
-        return (
-          <motion.button
-            key={tab.id}
-            onClick={() => onTabChange(tab.id)}
-            whileTap={{ scale: 0.9 }}
-            className={`floating-nav-item ${isActive ? 'active' : ''}`}
-            data-testid={`nav-${tab.id}`}
-          >
-            <Icon className={`w-5 h-5 transition-all duration-300 ${
-              isActive ? 'text-primary' : 'text-muted-foreground'
-            }`} strokeWidth={isActive ? 2.5 : 2} />
-            <span className={`text-[10px] mt-0.5 bangla-body transition-all duration-300 ${
-              isActive ? 'text-primary font-semibold' : 'text-muted-foreground'
-            }`}>
-              {tab.label}
-            </span>
-          </motion.button>
-        );
-      })}
-    </div>
-  </nav>
-);
+const BottomNavBar = ({ activeTab, onTabChange }) => {
+  // Mobile tabs - prioritize Ramadan during Ramadan season
+  const MOBILE_TABS = [
+    { id: 'home', icon: Home, label: 'হোম' },
+    { id: 'chat', icon: MessageCircle, label: 'চ্যাট' },
+    { id: 'ramadan', icon: Moon, label: 'রমজান' },
+    { id: 'news', icon: Newspaper, label: 'খবর' },
+    { id: 'zakat', icon: Calculator, label: 'যাকাত' },
+  ];
+  
+  return (
+    <nav className="floating-nav lg:hidden" data-testid="floating-nav">
+      <div className="flex justify-around items-center py-2 px-2">
+        {MOBILE_TABS.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          const isSpecial = tab.id === 'ramadan';
+          
+          return (
+            <motion.button
+              key={tab.id}
+              onClick={() => onTabChange(tab.id)}
+              whileTap={{ scale: 0.9 }}
+              className={`floating-nav-item ${isActive ? 'active' : ''} ${isSpecial && !isActive ? 'text-purple-500' : ''}`}
+              data-testid={`nav-${tab.id}`}
+            >
+              <Icon className={`w-5 h-5 transition-all duration-300 ${
+                isActive ? 'text-primary' : isSpecial ? 'text-purple-500' : 'text-muted-foreground'
+              }`} strokeWidth={isActive ? 2.5 : 2} />
+              <span className={`text-[10px] mt-0.5 bangla-body transition-all duration-300 ${
+                isActive ? 'text-primary font-semibold' : isSpecial ? 'text-purple-500' : 'text-muted-foreground'
+              }`}>
+                {tab.label}
+              </span>
+            </motion.button>
+          );
+        })}
+      </div>
+    </nav>
+  );
+};
 
 /**
  * Enhanced Sidebar Navigation for Desktop
