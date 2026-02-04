@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Menu, Moon, Sun, Home, MessageCircle, Newspaper, 
-  Trophy, Globe2, DollarSign, Clock 
+  Trophy, Globe2, DollarSign, Clock, Calculator, Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -25,7 +25,10 @@ import {
   NewsTab, 
   TranslateTab, 
   ExchangeTab, 
-  PrayerTab 
+  PrayerTab,
+  RamadanTiming,
+  ZakatCalculator,
+  RamadanGreeting
 } from "@/components/features";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -43,13 +46,15 @@ const OceanAtmosphere = () => (
 );
 
 /**
- * Navigation Tab Items
+ * Navigation Tab Items - Including Ramadan Features
  */
 const NAV_TABS = [
   { id: 'home', icon: Home, label: 'হোম' },
   { id: 'chat', icon: MessageCircle, label: 'চ্যাট' },
+  { id: 'ramadan', icon: Moon, label: 'রমজান', special: true },
   { id: 'news', icon: Newspaper, label: 'খবর' },
   { id: 'sports', icon: Trophy, label: 'খেলা' },
+  { id: 'zakat', icon: Calculator, label: 'যাকাত' },
   { id: 'translate', icon: Globe2, label: 'অনুবাদ' },
   { id: 'exchange', icon: DollarSign, label: 'মুদ্রা' },
   { id: 'prayer', icon: Clock, label: 'নামাজ' },
