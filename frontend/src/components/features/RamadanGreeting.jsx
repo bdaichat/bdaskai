@@ -1,24 +1,25 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 
 const RamadanGreeting = () => {
     const [isRamadan, setIsRamadan] = useState(false);
 
-    const checkRamadanStatus = () => {
-        const currentDate = new Date();
-        const ramadanStart = new Date(currentDate.getFullYear(), 2, 23); // Example start date
-        const ramadanEnd = new Date(currentDate.getFullYear(), 3, 21); // Example end date
-        setIsRamadan(currentDate >= ramadanStart && currentDate <= ramadanEnd);
-    };
-
     useEffect(() => {
-        checkRamadanStatus();
-    }, []); // dependency array changed from [] to [checkRamadanStatus]
+        const checkRamadanStatus = () => {
+            const today = new Date('2026-02-08'); // Current date
+            const ramadanStart = new Date('2026-03-16'); // Hypothetical start date
+            const ramadanEnd = new Date('2026-04-14'); // Hypothetical end date
 
-    return (
-        <div>
-            {isRamadan ? 'Ramadan Mubarak!' : 'Have a great day!'}
-        </div>
-    );
+            if (today >= ramadanStart && today <= ramadanEnd) {
+                setIsRamadan(true);
+            } else {
+                setIsRamadan(false);
+            }
+        };
+
+        checkRamadanStatus();
+    }, []); // Empty dependency array
+
+    return <div>{isRamadan ? 'Ramadan Mubarak!' : 'Have a great day!'}</div>;
 };
 
 export default RamadanGreeting;
