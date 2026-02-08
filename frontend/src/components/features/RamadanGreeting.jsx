@@ -5,21 +5,19 @@ const RamadanGreeting = () => {
 
     useEffect(() => {
         const checkRamadanStatus = () => {
-            const today = new Date('2026-02-08'); // Current date
-            const ramadanStart = new Date('2026-03-16'); // Hypothetical start date
-            const ramadanEnd = new Date('2026-04-14'); // Hypothetical end date
-
-            if (today >= ramadanStart && today <= ramadanEnd) {
-                setIsRamadan(true);
-            } else {
-                setIsRamadan(false);
-            }
+            const today = new Date();
+            const startRamadan = new Date(today.getFullYear(), 3, 13); // Example Ramadan start date
+            const endRamadan = new Date(today.getFullYear(), 4, 12); // Example Ramadan end date
+            setIsRamadan(today >= startRamadan && today <= endRamadan);
         };
-
         checkRamadanStatus();
-    }, []); // Empty dependency array
+    }, []);
 
-    return <div>{isRamadan ? 'Ramadan Mubarak!' : 'Have a great day!'}</div>;
+    return (
+        <div>
+            {isRamadan ? <h1>Ramadan Mubarak!</h1> : <h1>Welcome!</h1>}
+        </div>
+    );
 };
 
 export default RamadanGreeting;
